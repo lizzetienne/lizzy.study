@@ -133,6 +133,7 @@ document.addEventListener('keydown', e => {
 function route() {
   const [area, sid, tid, mode] = current.split('/').filter(Boolean).map(decodeURIComponent);
   window.scrollTo(0, 0);
+  dismissCelebration();
   if (area === 'fun') return renderFun();
   if (area !== 'schule') return renderStart();
   const s = sid && DATA.subjects.find(x => x.id === sid);
@@ -705,9 +706,107 @@ const TASKS = {
   },
 };
 
+/* ================= Belohnung: Katze mit Papiersternen ================= */
+
+const CAT_COUNT = 15;
+const catSrc = n => `assets/cats/cat-${String(n).padStart(2, '0')}.webp`;
+let lastCat = 0;
+let nextCat = null;
+
+// Nächste Katze schon vorladen, damit sie ohne Verzögerung erscheint
+function prepareCat() {
+  let n;
+  do n = 1 + Math.floor(Math.random() * CAT_COUNT); while (n === lastCat && CAT_COUNT > 1);
+  lastCat = n;
+  nextCat = new Image();
+  nextCat.src = catSrc(n);
+  nextCat.alt = '';
+  nextCat.className = 'cat-pop';
+  nextCat.decode?.().catch(() => {});
+}
+
+function paperStar(color, cls) {
+  return h('span', {
+    class: `paper-star ${cls}`, 'aria-hidden': 'true',
+    html: `<svg viewBox="0 0 24 24" width="100%" height="100%">
+      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="${color}" stroke="${color}" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4V2.5z" fill="#000" opacity=".14"/>
+      <path d="M12 2.5v14.9" stroke="#fff" stroke-width=".6" opacity=".35"/>
+    </svg>`,
+  });
+}
+
+let activeCelebration = null;
+
+function dismissCelebration() {
+  const layer = activeCelebration;
+  if (!layer) return;
+  activeCelebration = null;
+  layer.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 180, easing: 'ease-out' }).onfinish = () => layer.remove();
+}
+
+function celebrate(anchor) {
+  dismissCelebration();
+  if (!nextCat) prepareCat();
+  const cat = nextCat;
+  prepareCat();
+
+  const layer = h('div', { class: 'celebrate', 'aria-hidden': 'true' });
+  const rest = Math.max(80, window.innerHeight - anchor.getBoundingClientRect().top - 18);
+  cat.style.bottom = `${rest}px`;
+  const left = paperStar('#ffd36e', 'left');
+  const right = paperStar('#b8a5ff', 'right');
+  layer.append(left, right, cat);
+  document.body.append(layer);
+  activeCelebration = layer;
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) {
+    layer.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, fill: 'both' });
+    setTimeout(() => { if (activeCelebration === layer) dismissCelebration(); }, 1600);
+    return;
+  }
+
+  // Katze springt von unten hoch, federt kurz nach und taucht wieder ab
+  const jump = cat.animate([
+    { transform: 'translateY(115%) scale(.7, .7) rotate(-8deg)', opacity: 0 },
+    { transform: 'translateY(-16%) scale(1.04, 1.04) rotate(3deg)', opacity: 1, offset: .5 },
+    { transform: 'translateY(3%) scale(1.05, .95) rotate(-1deg)', offset: .72 },
+    { transform: 'translateY(0) scale(1, 1) rotate(0deg)', opacity: 1 },
+  ], { duration: 620, easing: 'cubic-bezier(.22, .9, .3, 1)', fill: 'both' });
+
+  // Sterne fliegen am Höhepunkt des Sprungs aus der Katze heraus
+  const catHeight = () => cat.getBoundingClientRect().height || 160;
+  const starBase = () => rest + catHeight() * .62;
+  [left, right].forEach(star => { star.style.bottom = `${starBase()}px`; });
+  const fly = (star, dx, dy, spin, delay) => star.animate([
+    { transform: 'translate(-50%, 0) scale(.2) rotate(0deg)', opacity: 0 },
+    { transform: `translate(calc(-50% + ${dx * .7}px), ${dy * .7}px) scale(1.1) rotate(${spin * .7}deg)`, opacity: 1, offset: .45 },
+    { transform: `translate(calc(-50% + ${dx}px), ${dy}px) scale(1) rotate(${spin}deg)`, opacity: 1, offset: .8 },
+    { transform: `translate(calc(-50% + ${dx * 1.05}px), ${dy + 14}px) scale(.9) rotate(${spin * 1.1}deg)`, opacity: 0 },
+  ], { duration: 1400, delay, easing: 'cubic-bezier(.2, .8, .3, 1)', fill: 'both' });
+  jump.ready.then(() => {
+    [left, right].forEach(star => { star.style.bottom = `${starBase()}px`; });
+    fly(left, -128, -96, -40, 220);
+    fly(right, 122, -132, 46, 270);
+  });
+
+  setTimeout(() => {
+    if (activeCelebration !== layer) return;
+    cat.animate([
+      { transform: 'translateY(0) scale(1) rotate(0deg)', opacity: 1 },
+      { transform: 'translateY(-6%) scale(1.02) rotate(-2deg)', opacity: 1, offset: .3 },
+      { transform: 'translateY(120%) scale(.8) rotate(6deg)', opacity: 0 },
+    ], { duration: 420, easing: 'cubic-bezier(.5, 0, .75, .2)', fill: 'both' }).onfinish = () => {
+      if (activeCelebration === layer) { activeCelebration = null; layer.remove(); }
+    };
+  }, 1900);
+}
+
 /* ================= Aufgaben-Ablauf ================= */
 
 function renderTasks(s, t, only) {
+  if (!nextCat) prepareCat();
   document.title = `${t.name} · Aufgaben`;
   const queue = only || t.tasks.map((_, i) => i);
   const results = {};
@@ -774,13 +873,15 @@ function renderTasks(s, t, only) {
 
   function feedback(ok, task) {
     const last = pos + 1 >= queue.length;
-    const next = h('button', { class: `btn ${ok ? 'ok' : 'bad'}`, onclick() { pos++; show(); } }, last ? 'Auswertung' : 'Weiter');
-    dock.replaceChildren(h('div', { class: `feedback ${ok ? 'ok' : 'bad'}`, role: 'status' },
+    const next = h('button', { class: `btn ${ok ? 'ok' : 'bad'}`, onclick() { dismissCelebration(); pos++; show(); } }, last ? 'Auswertung' : 'Weiter');
+    const panel = h('div', { class: `feedback ${ok ? 'ok' : 'bad'}`, role: 'status' },
       h('div', { class: 'fb-title' }, icon(ok ? 'check' : 'x', 20, 2.6), ok ? 'Richtig' : 'Nicht ganz'),
       task.explain ? rich('p', task.explain, { class: 'fb-text' }) : null,
       next,
-    ));
+    );
+    dock.replaceChildren(panel);
     next.focus({ preventScroll: true });
+    if (ok) requestAnimationFrame(() => celebrate(panel));
   }
 
   function finish() {

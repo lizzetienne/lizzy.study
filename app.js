@@ -59,6 +59,8 @@ const ICONS = {
   check: '<path d="M20 6L9 17l-5-5"/>',
   x: '<path d="M18 6L6 18M6 6l12 12"/>',
   home: '<path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
+  school: '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7z"/>',
   grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
 };
 
@@ -107,6 +109,7 @@ const share = st => (st.total ? st.right / st.total : 0);
 // Navigation ohne URL-Änderung, weil Claude-Seiten Links mit # abfangen
 const ROUTE_KEY = 'lizzy.study.route';
 const link = (...parts) => parts.map(encodeURIComponent).join('/');
+const school = (...parts) => link('schule', ...parts);
 let current = '';
 try { current = sessionStorage.getItem(ROUTE_KEY) || ''; } catch { current = ''; }
 
@@ -128,11 +131,13 @@ document.addEventListener('keydown', e => {
 });
 
 function route() {
-  const [sid, tid, mode] = current.split('/').filter(Boolean).map(decodeURIComponent);
+  const [area, sid, tid, mode] = current.split('/').filter(Boolean).map(decodeURIComponent);
+  window.scrollTo(0, 0);
+  if (area === 'fun') return renderFun();
+  if (area !== 'schule') return renderStart();
   const s = sid && DATA.subjects.find(x => x.id === sid);
   const t = s && tid && s.topics.find(x => x.id === tid);
-  window.scrollTo(0, 0);
-  if (!s) return renderHome();
+  if (!s) return renderSchool();
   if (!t) return renderSubject(s);
   if (mode === 'theorie') return renderTheory(s, t);
   if (mode === 'aufgaben') return renderTasks(s, t);
@@ -153,16 +158,68 @@ function topBar(href, label) {
 
 /* ================= Seiten ================= */
 
-function renderHome() {
+function ornaments() {
+  app.prepend(
+    h('div', { class: 'ornament', 'aria-hidden': 'true' }),
+    h('div', { class: 'ornament alt', 'aria-hidden': 'true' }),
+  );
+}
+
+function renderStart() {
   document.title = 'lizzy.study';
+  const st = DATA.subjects.reduce((acc, s) => {
+    const x = subjectStats(s);
+    return { total: acc.total + x.total, right: acc.right + x.right };
+  }, { total: 0, right: 0 });
+  const n = DATA.subjects.length;
   page(
-    h('nav', { class: 'top' }, h('div', { class: 'brand' }, 'lizzy', h('span', {}, '.study'))),
-    h('h1', {}, 'Fächer'),
+    h('header', { class: 'start-hero' },
+      h('h1', { class: 'wordmark' }, 'lizzy', h('span', {}, '.study')),
+    ),
+    h('div', { class: 'cards menu' },
+      h('a', { class: 'card', ...go(school()) },
+        h('div', { class: 'card-icon' }, icon('school', 22, 1.8)),
+        h('div', { class: 'card-main' },
+          h('div', { class: 'card-title' }, 'Schule'),
+          h('div', { class: 'card-meta' }, `${n} ${n === 1 ? 'Fach' : 'Fächer'} · ${Math.round(share(st) * 100)} % gelöst`),
+        ),
+        h('span', { class: 'chev' }, icon('next', 18)),
+      ),
+      h('a', { class: 'card', ...go(link('fun')) },
+        h('div', { class: 'card-icon' }, icon('spark', 22, 1.8)),
+        h('div', { class: 'card-main' },
+          h('div', { class: 'card-title' }, 'Fun'),
+          h('div', { class: 'card-meta' }, 'Kommt bald'),
+        ),
+        h('span', { class: 'chev' }, icon('next', 18)),
+      ),
+    ),
+  );
+  ornaments();
+}
+
+function renderFun() {
+  document.title = 'Fun · lizzy.study';
+  page(
+    topBar(link(), 'Start'),
+    h('h1', {}, 'Fun'),
+    h('div', { class: 'section empty' },
+      h('div', { class: 'card-icon' }, icon('spark', 22, 1.8)),
+      h('p', {}, 'Hier ist noch nichts. Wir bauen diesen Bereich als Nächstes.'),
+    ),
+  );
+}
+
+function renderSchool() {
+  document.title = 'Schule · lizzy.study';
+  page(
+    topBar(link(), 'Start'),
+    h('h1', {}, 'Schule'),
     h('p', { class: 'lead' }, 'Wähle ein Fach, um zu lernen und zu üben.'),
     h('div', { class: 'section grid' }, DATA.subjects.map(s => {
       const st = subjectStats(s);
       const n = s.topics.length;
-      return h('a', { class: 'tile', ...go(link(s.id)) },
+      return h('a', { class: 'tile', ...go(school(s.id)) },
         h('div', { class: 'tile-mark' }, s.short || s.name.slice(0, 1)),
         h('div', { class: 'tile-name' }, s.name),
         h('div', { class: 'tile-meta' }, `${n} ${n === 1 ? 'Thema' : 'Themen'} · ${Math.round(share(st) * 100)} %`),
@@ -170,23 +227,20 @@ function renderHome() {
       );
     })),
   );
-  app.prepend(
-    h('div', { class: 'ornament', 'aria-hidden': 'true' }),
-    h('div', { class: 'ornament alt', 'aria-hidden': 'true' }),
-  );
+  ornaments();
 }
 
 function renderSubject(s) {
   document.title = `${s.name} · lizzy.study`;
   page(
-    topBar(link(), 'Fächer'),
+    topBar(school(), 'Schule'),
     h('h1', {}, s.name),
     s.description ? h('p', { class: 'lead' }, s.description) : null,
     h('div', { class: 'section' },
       h('div', { class: 'section-label' }, 'Themen'),
       h('div', { class: 'list' }, s.topics.map(t => {
         const st = topicStats(s, t);
-        return h('a', { class: 'row', ...go(link(s.id, t.id)) },
+        return h('a', { class: 'row', ...go(school(s.id, t.id)) },
           h('div', { class: 'row-main' },
             h('div', { class: 'row-title' }, t.name),
             h('div', { class: 'row-meta' }, `${st.right} von ${st.total} Aufgaben richtig`),
@@ -208,12 +262,12 @@ function renderTopic(s, t) {
   document.title = `${t.name} · lizzy.study`;
   const st = topicStats(s, t);
   page(
-    topBar(link(s.id), s.name),
+    topBar(school(s.id), s.name),
     h('div', { class: 'eyebrow' }, s.name),
     h('h1', {}, t.name),
     t.summary ? h('p', { class: 'lead' }, t.summary) : null,
     h('div', { class: 'section cards' },
-      h('a', { class: 'card', ...go(link(s.id, t.id, 'theorie')) },
+      h('a', { class: 'card', ...go(school(s.id, t.id, 'theorie')) },
         h('div', { class: 'card-icon' }, icon('book', 22, 1.8)),
         h('div', { class: 'card-main' },
           h('div', { class: 'card-title' }, 'Theorie'),
@@ -221,7 +275,7 @@ function renderTopic(s, t) {
         ),
         h('span', { class: 'chev' }, icon('next', 18)),
       ),
-      h('a', { class: 'card', ...go(link(s.id, t.id, 'aufgaben')) },
+      h('a', { class: 'card', ...go(school(s.id, t.id, 'aufgaben')) },
         h('div', { class: 'card-icon' }, icon('pencil', 22, 1.8)),
         h('div', { class: 'card-main' },
           h('div', { class: 'card-title' }, 'Aufgaben'),
@@ -266,12 +320,12 @@ const BLOCKS = {
 function renderTheory(s, t) {
   document.title = `${t.name} · Theorie`;
   page(
-    topBar(link(s.id, t.id), t.name),
+    topBar(school(s.id, t.id), t.name),
     h('div', { class: 'eyebrow' }, 'Theorie'),
     h('h1', {}, t.name),
     h('article', { class: 'prose' }, t.theory.map(b => (BLOCKS[b.type] || BLOCKS.p)(b))),
     h('div', { class: 'prose-end' },
-      h('a', { class: 'btn primary', ...go(link(s.id, t.id, 'aufgaben')) }, 'Zu den Aufgaben'),
+      h('a', { class: 'btn primary', ...go(school(s.id, t.id, 'aufgaben')) }, 'Zu den Aufgaben'),
     ),
   );
 }
@@ -666,7 +720,7 @@ function renderTasks(s, t, only) {
 
   page(
     h('nav', { class: 'task-top' },
-      h('a', { class: 'close', ...go(link(s.id, t.id)), 'aria-label': 'Schließen' }, icon('close', 22, 2)),
+      h('a', { class: 'close', ...go(school(s.id, t.id)), 'aria-label': 'Schließen' }, icon('close', 22, 2)),
       h('div', { class: 'bar' }, fill),
       count,
       homeButton(),
@@ -751,7 +805,7 @@ function renderTasks(s, t, only) {
     dock.replaceChildren(h('div', { class: 'btn-stack' },
       open.length ? h('button', { class: 'btn primary', onclick: () => renderTasks(s, t, open) }, repeatLabel) : null,
       h('button', { class: `btn ${open.length ? 'secondary' : 'primary'}`, onclick: () => renderTasks(s, t) }, 'Alle nochmal'),
-      h('a', { class: 'btn secondary', ...go(link(s.id, t.id)) }, 'Zum Thema'),
+      h('a', { class: 'btn secondary', ...go(school(s.id, t.id)) }, 'Zum Thema'),
     ));
   }
 

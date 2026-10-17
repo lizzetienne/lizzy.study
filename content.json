@@ -744,7 +744,7 @@
         {
           "id": "kraeuter",
           "type": "mix",
-          "prompt": "Mini-Spiel: Misch ein Heilmittel, das dich **voll heilt und Gift entfernt**. Zieh die Kräuter in die Schale.",
+          "prompt": "Mini-Spiel: Misch ein Heilmittel, das dich **voll heilt und Gift entfernt**. Zieh die Kräuter in den Mörser.",
           "herbs": [
             {
               "id": "g",

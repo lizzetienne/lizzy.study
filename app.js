@@ -895,6 +895,7 @@ function renderTasks(s, t, only) {
     }, 'Überspringen');
     dock.replaceChildren(h('div', { class: 'dock-actions' }, button, skip));
     window.scrollTo(0, 0);
+    if (t.theme) themeEnter(t.theme);
 
     function submit() {
       const result = view.check();
@@ -917,7 +918,7 @@ function renderTasks(s, t, only) {
     );
     dock.replaceChildren(panel);
     next.focus({ preventScroll: true });
-    if (ok) sfx.correct(); else sfx.wrong();
+    themeSound(t.theme, ok);
     if (ok) requestAnimationFrame(() => celebrate(panel));
   }
 

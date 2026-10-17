@@ -99,6 +99,35 @@ const sfx = (() => {
       tone(60, { dur: 0.16, vol: 0.35, to: 40 });
       tone(55, { dur: 0.18, vol: 0.28, to: 38, delay: 0.22 });
     }),
+    creak: play(() => {
+      const a = audio();
+      if (!a) return;
+      const t0 = a.currentTime;
+      const osc = a.createOscillator();
+      const lfo = a.createOscillator();
+      const depth = a.createGain();
+      const gain = a.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(210, t0);
+      osc.frequency.exponentialRampToValueAtTime(120, t0 + 0.9);
+      lfo.frequency.value = 23;
+      depth.gain.value = 30;
+      lfo.connect(depth).connect(osc.frequency);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.045, t0 + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.95);
+      osc.connect(gain).connect(a.destination);
+      osc.start(t0); lfo.start(t0);
+      osc.stop(t0 + 1); lfo.stop(t0 + 1);
+      noise({ dur: 0.5, vol: 0.05, freq: 500, delay: 0.5 });
+    }),
+    pickup: play(() => {
+      [784, 1047, 1319, 1568].forEach((f, i) => tone(f, { type: 'triangle', dur: 0.16, vol: 0.11, delay: i * 0.07 }));
+    }),
+    dead: play(() => {
+      tone(98, { type: 'sawtooth', dur: 1.1, vol: 0.08, to: 49 });
+      tone(147, { type: 'sawtooth', dur: 0.9, vol: 0.05, to: 73 });
+    }),
     menacing: play(() => {
       tone(52, { type: 'sawtooth', dur: 1.4, vol: 0.05, to: 46 });
       tone(78, { type: 'sawtooth', dur: 1.2, vol: 0.03, to: 70, delay: 0.15 });
@@ -128,11 +157,38 @@ const THEMES = {
       stage.append(h('div', { class: 'tbc', 'aria-hidden': 'true' }, h('span', {}, 'TO BE CONTINUED')));
     },
   },
-  // Dunkle Ränder, Filmkorn und ein Herzschlag zum Start
+  // Horror-Stimmung: flackerndes Licht, Staub, Blutspuren, Türen zwischen den Fragen
   re: {
     layer() {
-      app.prepend(h('div', { class: 're-mood', 'aria-hidden': 'true' }));
+      const dust = Array.from({ length: 16 }, (_, i) => h('span', {
+        class: 'dust',
+        style: `--x:${Math.round(Math.random() * 100)}%;--d:${(9 + Math.random() * 10).toFixed(1)}s;--delay:${(-Math.random() * 18).toFixed(1)}s;--s:${(1 + Math.random() * 2.2).toFixed(1)}px`,
+      }));
+      const drips = h('div', {
+        class: 're-drips',
+        html: '<svg viewBox="0 0 400 60" preserveAspectRatio="none" width="100%" height="100%">'
+          + '<path class="drip-band" d="M0 0H400V6C380 6 372 9 360 7S330 5 318 8 290 6 270 7 236 5 220 8 190 6 170 7 140 5 120 8 90 6 70 7 40 5 20 8 6 6 0 7Z"/>'
+          + '<path class="drip" style="--l:0s" d="M58 6c0 0 4 18 4 26a4 4 0 0 1-8 0c0-8 4-26 4-26z"/>'
+          + '<path class="drip" style="--l:.6s" d="M172 6c0 0 3 30 3 40a3 3 0 0 1-6 0c0-10 3-40 3-40z"/>'
+          + '<path class="drip" style="--l:1.1s" d="M296 6c0 0 4 12 4 18a4 4 0 0 1-8 0c0-6 4-18 4-18z"/>'
+          + '<path class="drip" style="--l:.3s" d="M362 6c0 0 2 22 2 30a2.5 2.5 0 0 1-5 0c0-8 3-30 3-30z"/>'
+          + '</svg>',
+      });
+      app.prepend(h('div', { class: 're-mood', 'aria-hidden': 'true' }, h('div', { class: 're-light' }), dust, drips));
       sfx.heartbeat();
+    },
+    enter() {
+      // Die typische Tür-Animation aus den alten Teilen
+      document.querySelector('.re-door')?.remove();
+      const door = h('div', { class: 're-door', 'aria-hidden': 'true' },
+        h('div', { class: 'door-half left' }, h('i'), h('i'), h('b')),
+        h('div', { class: 'door-half right' }, h('i'), h('i'), h('b')));
+      document.body.append(door);
+      sfx.creak();
+      door.addEventListener('animationend', e => { if (e.target === door) door.remove(); });
+    },
+    sound(ok) {
+      if (ok) sfx.pickup(); else sfx.dead();
     },
     finish(stage, perfect) {
       const text = perfect ? 'YOU SURVIVED' : 'YOU ARE DEAD';
@@ -141,6 +197,12 @@ const THEMES = {
       [...text].forEach((ch, i) => setTimeout(() => {
         line.textContent += ch;
         if (ch !== ' ') sfx.clack();
+        if (i === text.length - 1 && !perfect) {
+          for (let d = 0; d < 7; d++) {
+            line.append(h('span', { class: 'blood', style: `left:${8 + d * 13 + Math.random() * 6}%;--h:${14 + Math.random() * 34}px;--t:${(Math.random() * 0.8).toFixed(2)}s` }));
+          }
+          sfx.dead();
+        }
       }, 500 + i * 90));
     },
   },
@@ -148,6 +210,17 @@ const THEMES = {
 
 function themeLayer(theme) {
   THEMES[theme]?.layer();
+}
+
+function themeEnter(theme) {
+  THEMES[theme]?.enter?.();
+}
+
+function themeSound(theme, ok) {
+  const custom = THEMES[theme]?.sound;
+  if (custom) custom(ok);
+  else if (ok) sfx.correct();
+  else sfx.wrong();
 }
 
 function themeFinish(theme, stage, perfect) {
@@ -530,76 +603,181 @@ function enableHeightDrag(handle, get, set, perPixel) {
 
 /* ================= Resident Evil: Kräuter, Koffer, Schreibmaschine ================= */
 
-const LEAF = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z" fill="var(--c)"/>'
-  + '<path d="M4 20L15 9" stroke="rgba(0,0,0,.35)" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
-
 function shake(el) {
   el.classList.remove('shake');
   void el.offsetWidth;
   el.classList.add('shake');
 }
 
+// Kraut im Topf, in der Farbe des Krauts
+function herbPot(color) {
+  return `<svg viewBox="0 0 40 40" width="100%" height="100%">
+    <path d="M20 25C13 22 9 15 12 7c5 3 8 8 8 18z" fill="${color}"/>
+    <path d="M20 25c7-3 11-10 8-18-5 3-8 8-8 18z" fill="${color}"/>
+    <path d="M20 25c-2-8-1-14 0-20 1 6 2 12 0 20z" fill="${color}" opacity=".75"/>
+    <path d="M20 25L13 10M20 25l7-15" stroke="rgba(0,0,0,.3)" stroke-width="1" fill="none"/>
+    <rect x="9" y="23" width="22" height="4" rx="1.5" fill="#a35d34"/>
+    <path d="M10.5 27h19l-2.5 11h-14z" fill="#86492a"/>
+    <path d="M12 28h3l-1.8 9h-1.4z" fill="#fff" opacity=".12"/>
+  </svg>`;
+}
+
+const LEAF = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z" fill="var(--c)"/>'
+  + '<path d="M4 20L15 9" stroke="rgba(0,0,0,.35)" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
+
+// Gezeichnete Gegenstände für den Koffer, jeweils in ihrer Grundausrichtung
+const ITEM_MODELS = {
+  shotgun: { view: '0 0 120 20', svg: `
+    <path d="M2 10.5 31 6.5l3 7.5-30 3.2c-2.2-1.4-2.6-4.3-2-6.7z" fill="#7b4a27"/>
+    <path d="M4 11 30 7.5" stroke="#a36a3c" stroke-width="1" opacity=".7"/>
+    <rect x="30" y="5" width="22" height="8.5" rx="1.5" fill="#3b3e44"/>
+    <rect x="30" y="5" width="22" height="2" rx="1" fill="#6f747c"/>
+    <path d="M40 13.5h6l-1.6 5h-5.2z" fill="#2b2d31"/>
+    <path d="M38 13.5q1 4 5 3.6" stroke="#2b2d31" stroke-width="1.4" fill="none"/>
+    <rect x="51" y="5.6" width="66" height="3.2" rx="1" fill="#5a5e65"/>
+    <rect x="51" y="5.8" width="66" height=".9" fill="#a3a9b2" opacity=".6"/>
+    <rect x="51" y="9.2" width="50" height="2.8" rx="1" fill="#45484e"/>
+    <rect x="62" y="8" width="21" height="5.4" rx="2" fill="#8c5b2f"/>
+    <path d="M64 9.5v3M67 9.5v3M70 9.5v3M73 9.5v3M76 9.5v3M79 9.5v3" stroke="#6b421f" stroke-width=".8"/>` },
+  handgun: { view: '0 0 60 40', svg: `
+    <rect x="5" y="6" width="50" height="11" rx="2" fill="#4b4f57"/>
+    <rect x="5" y="6" width="50" height="2.4" rx="1" fill="#8a909a"/>
+    <path d="M9 9v6M11.5 9v6M14 9v6M16.5 9v6" stroke="#33363b" stroke-width="1"/>
+    <rect x="53" y="9" width="3" height="4" fill="#1f2023"/>
+    <rect x="11" y="16.5" width="34" height="5" fill="#35383d"/>
+    <path d="M11 19h14l-3.4 18.5H8.6z" fill="#26272a"/>
+    <path d="M12.5 22h9M12 25h9M11.5 28h9M11 31h9" stroke="#3a3b3f" stroke-width="1"/>
+    <path d="M25 21.5q2 9 10 5.5v-5.5" fill="none" stroke="#35383d" stroke-width="2.4"/>
+    <path d="M28.5 21.5q1 4 3 4" stroke="#1a1b1d" stroke-width="1.6" fill="none"/>` },
+  ammo: { view: '0 0 40 40', svg: `
+    ${[0, 1, 2, 3, 4].map(i => `<rect x="${6.5 + i * 6}" y="5" width="4.2" height="10" rx="1" fill="#c9a24a"/><path d="M${6.5 + i * 6} 6.5q2.1-5 4.2 0z" fill="#b07a3a"/>`).join('')}
+    <rect x="3" y="13" width="34" height="24" rx="2" fill="#6d5428"/>
+    <rect x="3" y="13" width="34" height="3" rx="1" fill="#8a6c36"/>
+    <rect x="8" y="21" width="24" height="10" rx="1" fill="#e6d7a6"/>
+    <path d="M11 24.5h18M11 27.5h12" stroke="#6d5428" stroke-width="1.3"/>` },
+  spray: { view: '0 0 20 40', svg: `
+    <rect x="7" y="1" width="6" height="3" rx="1" fill="#b9bcc0"/>
+    <rect x="5.5" y="3.5" width="9" height="5" rx="1.5" fill="#d9dbde"/>
+    <rect x="3" y="8" width="14" height="30" rx="3" fill="#2f7d5b"/>
+    <rect x="4.2" y="9" width="2" height="27" rx="1" fill="#fff" opacity=".18"/>
+    <rect x="3" y="17" width="14" height="11" fill="#f1f1ef"/>
+    <path d="M9 19h2v2.6h2.6v2.2H11v2.6H9v-2.6H6.4v-2.2H9z" fill="#c8362d"/>` },
+  knife: { view: '0 0 60 20', svg: `
+    <rect x="2" y="7" width="21" height="7" rx="3" fill="#26272a"/>
+    <path d="M6 8.5v4M9 8.5v4M12 8.5v4M15 8.5v4" stroke="#3a3b3f" stroke-width="1"/>
+    <rect x="22" y="4" width="3" height="13" rx="1" fill="#6e737b"/>
+    <path d="M25 6.5h25c4 .5 7 2.5 8.5 4.5-6 2.6-17 3-33.5 3z" fill="#c9ced6"/>
+    <path d="M25 7.6h24" stroke="#fff" stroke-width=".8" opacity=".7"/>
+    <path d="M25 13.6c12 0 24-.4 33-2.4" stroke="#8d939c" stroke-width=".7" fill="none"/>` },
+  green: { view: '0 0 40 40', svg: '' },
+  red: { view: '0 0 40 40', svg: '' },
+  grenade: { view: '0 0 20 20', svg: `
+    <rect x="7.8" y="3.4" width="4.4" height="3.6" rx=".6" fill="#8d9096"/>
+    <path d="M12 4q4.4 1.4 3.4 9.4" stroke="#a6a9ae" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <circle cx="6" cy="4.4" r="2" fill="none" stroke="#c4c6ca" stroke-width="1"/>
+    <ellipse cx="10" cy="12.6" rx="6" ry="6.6" fill="#56613a"/>
+    <path d="M4.4 11h11.2M4.6 14.4h10.8M8 6.4v12.6M12 6.4v12.6" stroke="#3f4729" stroke-width=".9"/>
+    <ellipse cx="7.8" cy="10" rx="1.4" ry="2.4" fill="#fff" opacity=".14"/>` },
+};
+
+function itemModel(item) {
+  if (item.id === 'green' || item.id === 'red') return herbPot(item.id === 'green' ? '#4caf5c' : '#d8453b');
+  const m = ITEM_MODELS[item.id];
+  return m ? `<svg viewBox="${m.view}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">${m.svg}</svg>` : '';
+}
+
 Object.assign(TASKS, {
-  // Kräuter in eine Schale ziehen und mischen
+  // Kräuter in einen Mörser ziehen und mischen
   mix: {
     label: 'Kräuter mischen',
     render(task, ctx) {
       const added = [];
       const herbById = Object.fromEntries(task.herbs.map(x => [x.id, x]));
       const leaf = color => h('span', { class: 'leaf', style: `--c:${color}`, html: LEAF });
-      const bowlItems = h('div', { class: 'bowl-items' });
-      const bowl = h('div', { class: 'bowl', 'data-drop': '' }, bowlItems, h('div', { class: 'bowl-hint' }, 'Schale'));
+      const liquid = h('div', { class: 'liquid' },
+        Array.from({ length: 6 }, (_, i) => h('span', { class: 'bubble', style: `--i:${i};--x:${12 + i * 15}%` })));
+      const floating = h('div', { class: 'bowl-items' });
+      const bowl = h('div', { class: 'bowl', 'data-drop': '' }, liquid, floating);
+      const steam = h('div', { class: 'steam' }, h('span'), h('span'), h('span'));
+      const mortar = h('div', { class: 'mortar' }, steam, bowl, h('div', { class: 'mortar-base' }));
 
+      function mixColor() {
+        const rgb = added.map(id => herbById[id].color.match(/\w\w/g).map(x => parseInt(x, 16)));
+        const avg = [0, 1, 2].map(k => Math.round(rgb.reduce((sum, c) => sum + c[k], 0) / rgb.length));
+        return `rgb(${avg.join(',')})`;
+      }
       function paint() {
-        bowlItems.replaceChildren(...added.map((id, i) => h('button', {
-          class: 'bowl-herb', type: 'button', 'aria-label': `${herbById[id].name} entfernen`,
+        floating.replaceChildren(...added.map((id, i) => h('button', {
+          class: 'bowl-herb', type: 'button', style: `--r:${(i - 1) * 24}deg`, 'aria-label': `${herbById[id].name} entfernen`,
           onclick() {
             if (box.classList.contains('locked')) return;
             added.splice(i, 1);
             paint();
           },
         }, leaf(herbById[id].color))));
+        liquid.style.setProperty('--level', `${added.length ? 22 + added.length * 18 : 0}%`);
+        if (added.length) liquid.style.setProperty('--mix', mixColor());
+        mortar.classList.toggle('brewing', added.length > 0);
         ctx.setReady(added.length > 0);
       }
-      function add(id) {
+      function add(id, from) {
         if (added.length >= task.max) { shake(bowl); return; }
         added.push(id);
         sfx.brew();
+        if (from) flyLeaf(from, herbById[id].color);
         paint();
         bowl.classList.remove('splash');
         void bowl.offsetWidth;
         bowl.classList.add('splash');
       }
+      function flyLeaf(from, color) {
+        const a = from.getBoundingClientRect();
+        const b = bowl.getBoundingClientRect();
+        const flyer = h('span', { class: 'leaf flying', style: `--c:${color};left:${a.left + a.width / 2 - 16}px;top:${a.top + 8}px`, html: LEAF });
+        document.body.append(flyer);
+        flyer.animate([
+          { transform: 'translate(0, 0) rotate(0deg) scale(1)' },
+          { transform: `translate(${(b.left + b.width / 2 - a.left - a.width / 2) / 2}px, -60px) rotate(160deg) scale(1.1)`, offset: .5 },
+          { transform: `translate(${b.left + b.width / 2 - a.left - a.width / 2}px, ${b.top + 30 - a.top}px) rotate(320deg) scale(.6)`, opacity: .2 },
+        ], { duration: 520, easing: 'cubic-bezier(.3, .7, .4, 1)' }).onfinish = () => flyer.remove();
+      }
 
       const shelf = h('div', { class: 'herb-shelf' }, task.herbs.map(herb => {
-        const el = h('button', { class: 'herb', type: 'button' }, leaf(herb.color), h('span', {}, herb.name));
-        enableDrag(el, { onTap: () => add(herb.id), onDrop: target => { if (target === bowl) add(herb.id); } });
+        const el = h('button', { class: 'herb', type: 'button' },
+          h('span', { class: 'pot', html: herbPot(herb.color) }), h('span', { class: 'herb-name' }, herb.name));
+        enableDrag(el, { onTap: () => add(herb.id, el), onDrop: target => { if (target === bowl) add(herb.id); } });
         return el;
       }));
-      const box = h('div', { class: 'mix' }, shelf, bowl,
-        h('p', { class: 'mix-note' }, `Höchstens ${task.max} Kräuter. Ein Kraut in der Schale antippen, um es zu entfernen.`));
+      const box = h('div', { class: 'mix' }, h('div', { class: 'shelf-board' }, shelf), mortar,
+        h('p', { class: 'mix-note' }, `Höchstens ${task.max} Kräuter. Ein Blatt im Mörser antippen, um es wieder herauszunehmen.`));
       return {
         el: box,
         check() {
           box.classList.add('locked');
           const ok = [...added].sort().join() === [...task.answer].sort().join();
-          bowl.classList.add(ok ? 'correct' : 'wrong');
+          mortar.classList.add(ok ? 'correct' : 'wrong');
+          if (ok) {
+            for (let i = 0; i < 10; i++) {
+              mortar.append(h('span', { class: 'spark', style: `--a:${i * 36}deg;--dl:${(i % 3) * 0.06}s` }));
+            }
+          }
           return ok;
         },
       };
     },
   },
 
-  // Gegenstände in ein Koffer-Raster packen (Inventar aus Resident Evil 4)
+  // Gegenstände in den Lederkoffer aus Resident Evil 4 packen
   inventory: {
     label: 'Koffer packen',
     render(task, ctx) {
-      const CELL = 46;
+      const CELL = 42;
       const { cols, rows } = task;
       const preview = h('div', { class: 'case-preview', hidden: true });
       const grid = h('div', { class: 'case-grid', style: `width:${cols * CELL}px;height:${rows * CELL}px;--cell:${CELL}px` }, preview);
       const tray = h('div', { class: 'case-tray' });
-      const items = task.items.map(it => ({ ...it, x: null, y: null, el: null }));
+      const counter = h('span', { class: 'case-count' });
+      const items = task.items.map(it => ({ ...it, baseW: it.w, baseH: it.h, x: null, y: null, el: null, model: null }));
 
       const fits = (item, x, y, w, hh) => {
         if (x < 0 || y < 0 || x + w > cols || y + hh > rows) return false;
@@ -609,7 +787,10 @@ Object.assign(TASKS, {
       const size = item => {
         item.el.style.width = `${item.w * CELL}px`;
         item.el.style.height = `${item.h * CELL}px`;
-        item.el.classList.toggle('tall', item.h > item.w);
+        const rotated = item.w !== item.baseW;
+        item.model.style.width = `${item.baseW * CELL - 8}px`;
+        item.model.style.height = `${item.baseH * CELL - 8}px`;
+        item.model.style.transform = `translate(-50%, -50%) rotate(${rotated ? 90 : 0}deg)`;
       };
       const place = (item, x, y) => {
         item.x = x;
@@ -618,16 +799,25 @@ Object.assign(TASKS, {
         item.el.style.top = `${y * CELL}px`;
         item.el.classList.add('placed');
         grid.append(item.el);
+        item.el.classList.remove('landed');
+        void item.el.offsetWidth;
+        item.el.classList.add('landed');
       };
       const toTray = item => {
         item.x = null;
         item.y = null;
-        item.el.classList.remove('placed');
+        item.el.classList.remove('placed', 'landed');
         item.el.style.left = '';
         item.el.style.top = '';
         tray.append(item.el);
       };
-      const changed = () => ctx.setReady(items.every(i => i.x !== null));
+      const changed = () => {
+        const placed = items.filter(i => i.x !== null).length;
+        counter.textContent = `${placed}/${items.length}`;
+        const full = placed === items.length;
+        shell.classList.toggle('full', full);
+        ctx.setReady(full);
+      };
 
       function rotate(item) {
         if (item.w === item.h) return;
@@ -654,7 +844,7 @@ Object.assign(TASKS, {
             if (!ghost && Math.hypot(ev.clientX - startX, ev.clientY - startY) < 6) return;
             if (!ghost) {
               ghost = el.cloneNode(true);
-              ghost.classList.remove('placed');
+              ghost.classList.remove('placed', 'landed');
               ghost.classList.add('case-ghost');
               ghost.style.left = '0px';
               ghost.style.top = '0px';
@@ -662,7 +852,7 @@ Object.assign(TASKS, {
               el.classList.add('lifting');
             }
             const gx = ev.clientX - offX, gy = ev.clientY - offY;
-            ghost.style.transform = `translate(${gx}px, ${gy}px)`;
+            ghost.style.transform = `translate(${gx}px, ${gy}px) rotate(-3deg) scale(1.05)`;
             const g = grid.getBoundingClientRect();
             const over = ev.clientX > g.left - CELL / 2 && ev.clientX < g.right + CELL / 2
               && ev.clientY > g.top - CELL / 2 && ev.clientY < g.bottom + CELL / 2;
@@ -700,17 +890,26 @@ Object.assign(TASKS, {
       }
 
       for (const item of items) {
-        item.el = h('div', { class: 'case-item', style: `--c:${item.color}` }, h('span', {}, item.name));
+        item.model = h('span', { class: 'case-model', html: itemModel(item) });
+        item.el = h('div', { class: 'case-item', title: item.name, 'aria-label': item.name }, item.model);
         size(item);
         enableCaseDrag(item);
         tray.append(item.el);
       }
-      const box = h('div', { class: 'case' }, h('div', { class: 'case-shell' }, grid), tray);
+      const shell = h('div', { class: 'case-shell' },
+        h('div', { class: 'case-handle' }),
+        h('div', { class: 'case-latch left' }), h('div', { class: 'case-latch right' }),
+        h('div', { class: 'case-lining' }, grid),
+        h('div', { class: 'case-label' }, h('span', {}, 'ATTACHÉ CASE'), counter));
+      changed();
+      const box = h('div', { class: 'case' }, shell, h('div', { class: 'case-tray-wrap' }, tray));
       return {
         el: box,
         check() {
           box.classList.add('locked');
-          return items.every(i => i.x !== null);
+          const ok = items.every(i => i.x !== null);
+          if (ok) shell.classList.add('done');
+          return ok;
         },
       };
     },
@@ -724,14 +923,32 @@ Object.assign(TASKS, {
         class: 'tw-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false',
         'aria-label': 'Fehlendes Wort', size: Math.max(6, task.answer.length),
       });
-      field.addEventListener('input', () => { sfx.clack(); ctx.setReady(field.value.trim() !== ''); });
-      field.addEventListener('keydown', e => { if (e.key === 'Enter') ctx.submit(); });
-      const extra = h('div');
-      const ribbon = h('div', { class: 'tw-ribbon' }, 'Farbband × 1');
+      const keys = [10, 9, 7].map((n, r) => h('div', { class: 'tw-row', style: `--r:${r}` },
+        Array.from({ length: n }, () => h('span', { class: 'tw-key' }))));
+      const allKeys = keys.flatMap(row => [...row.children]);
+      const space = h('span', { class: 'tw-space' });
+      const carriage = h('div', { class: 'tw-carriage' });
       const paper = h('div', { class: 'tw-paper' }, h('span', {}, `${task.before} `), field, h('span', {}, task.after));
+      const ribbon = h('div', { class: 'tw-ribbon' }, h('span', { class: 'ribbon-icon' }), h('span', { class: 'ribbon-text' }, 'Farbband × 1'));
+      const extra = h('div');
+
+      field.addEventListener('input', e => {
+        sfx.clack();
+        const key = e.data === ' ' ? space : allKeys[Math.floor(Math.random() * allKeys.length)];
+        key.classList.remove('press');
+        void key.offsetWidth;
+        key.classList.add('press');
+        carriage.style.setProperty('--shift', `${-Math.min(field.value.length, 12) * 3}px`);
+        ctx.setReady(field.value.trim() !== '');
+      });
+      field.addEventListener('keydown', e => { if (e.key === 'Enter') ctx.submit(); });
+
+      const machine = h('div', { class: 'tw-machine' },
+        carriage,
+        h('div', { class: 'tw-body' }, h('div', { class: 'tw-keys' }, keys, h('div', { class: 'tw-row' }, space))));
       let tries = 0;
       return {
-        el: h('div', { class: 'tw' }, paper, ribbon, extra),
+        el: h('div', { class: 'tw' }, h('div', { class: 'tw-feed' }, paper), machine, ribbon, extra),
         check() {
           const ok = matchesAnswer(field.value, task.answer);
           if (!ok && task.hint && tries++ === 0) {
@@ -741,7 +958,8 @@ Object.assign(TASKS, {
           }
           field.disabled = true;
           field.classList.add(ok ? 'correct' : 'wrong');
-          ribbon.textContent = ok ? 'Gespeichert.' : 'Farbband × 0';
+          ribbon.querySelector('.ribbon-text').textContent = ok ? 'Spiel gespeichert.' : 'Farbband × 0';
+          ribbon.classList.add(ok ? 'saved' : 'empty');
           if (ok) sfx.ding();
           else extra.replaceChildren(h('div', { class: 'reveal' }, 'Richtig wäre: ', h('strong', {}, task.answer)));
           return ok;

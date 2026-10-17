@@ -61,6 +61,8 @@ const ICONS = {
   home: '<path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/>',
   school: '<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
   spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.7 2.3L22 18l-2.3.7L19 21l-.7-2.3L16 18l2.3-.7z"/>',
+  sound: '<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>',
+  mute: '<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/>',
   grip: '<circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/>',
 };
 
@@ -130,11 +132,26 @@ document.addEventListener('keydown', e => {
   if (target && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(target.dataset.route); }
 });
 
+// Aufräumen beim Seitenwechsel (laufende Timer, Effekte, Töne)
+let taskCleanup = null;
+function cleanupTask() {
+  taskCleanup?.();
+  taskCleanup = null;
+}
+
+const FUN = { id: 'fun', name: 'Fun' };
+
 function route() {
   const [area, sid, tid, mode] = current.split('/').filter(Boolean).map(decodeURIComponent);
   window.scrollTo(0, 0);
   dismissCelebration();
-  if (area === 'fun') return renderFun();
+  cleanupTask();
+  sfx.active = false;
+  document.body.dataset.theme = '';
+  if (area === 'fun') {
+    const quiz = sid && (DATA.fun || []).find(x => x.id === sid);
+    return quiz ? renderTasks(FUN, { ...quiz, back: link('fun'), backLabel: 'Zurück zu Fun' }) : renderFun();
+  }
   if (area !== 'schule') return renderStart();
   const s = sid && DATA.subjects.find(x => x.id === sid);
   const t = s && tid && s.topics.find(x => x.id === tid);
@@ -173,6 +190,7 @@ function renderStart() {
     return { total: acc.total + x.total, right: acc.right + x.right };
   }, { total: 0, right: 0 });
   const n = DATA.subjects.length;
+  const quizzes = (DATA.fun || []).length;
   page(
     h('header', { class: 'start-hero' },
       h('h1', { class: 'wordmark' }, 'lizzy', h('span', {}, '.study')),
@@ -190,7 +208,7 @@ function renderStart() {
         h('div', { class: 'card-icon' }, icon('spark', 22, 1.8)),
         h('div', { class: 'card-main' },
           h('div', { class: 'card-title' }, 'Fun'),
-          h('div', { class: 'card-meta' }, 'Kommt bald'),
+          h('div', { class: 'card-meta' }, quizzes ? `${quizzes} ${quizzes === 1 ? 'Quiz' : 'Quizze'}` : 'Kommt bald'),
         ),
         h('span', { class: 'chev' }, icon('next', 18)),
       ),
@@ -201,12 +219,23 @@ function renderStart() {
 
 function renderFun() {
   document.title = 'Fun · lizzy.study';
+  const quizzes = DATA.fun || [];
   page(
     topBar(link(), 'Start'),
     h('h1', {}, 'Fun'),
-    h('div', { class: 'section empty' },
+    quizzes.length ? h('div', { class: 'section cards' }, quizzes.map(q => {
+      const st = topicStats(FUN, q);
+      return h('a', { class: `card quiz-card theme-${q.theme || 'none'}`, ...go(link('fun', q.id)) },
+        h('div', { class: 'card-icon quiz-mark' }, q.short || q.name.slice(0, 2)),
+        h('div', { class: 'card-main' },
+          h('div', { class: 'card-title' }, q.name),
+          h('div', { class: 'card-meta' }, `${q.description || `${q.tasks.length} Fragen`} · ${st.right}/${st.total} richtig`),
+        ),
+        h('span', { class: 'chev' }, icon('next', 18)),
+      );
+    })) : h('div', { class: 'section empty' },
       h('div', { class: 'card-icon' }, icon('spark', 22, 1.8)),
-      h('p', {}, 'Hier ist noch nichts. Wir bauen diesen Bereich als Nächstes.'),
+      h('p', {}, 'Hier ist noch nichts.'),
     ),
   );
 }
@@ -807,7 +836,11 @@ function celebrate(anchor) {
 
 function renderTasks(s, t, only) {
   if (!nextCat) prepareCat();
+  cleanupTask();
   document.title = `${t.name} · Aufgaben`;
+  const back = t.back || school(s.id, t.id);
+  sfx.active = !!t.sound;
+  document.body.dataset.theme = t.theme || '';
   const queue = only || t.tasks.map((_, i) => i);
   const results = {};
   let pos = 0;
@@ -819,14 +852,16 @@ function renderTasks(s, t, only) {
 
   page(
     h('nav', { class: 'task-top' },
-      h('a', { class: 'close', ...go(school(s.id, t.id)), 'aria-label': 'Schließen' }, icon('close', 22, 2)),
+      h('a', { class: 'close', ...go(back), 'aria-label': 'Schließen' }, icon('close', 22, 2)),
       h('div', { class: 'bar' }, fill),
       count,
+      t.sound ? soundToggle() : null,
       homeButton(),
     ),
     stage,
   );
   app.append(dock);
+  if (t.theme) themeLayer(t.theme);
 
   function updateTop() {
     fill.style.width = `${(pos / queue.length) * 100}%`;
@@ -834,6 +869,7 @@ function renderTasks(s, t, only) {
   }
 
   function show() {
+    cleanupTask();
     if (pos >= queue.length) return finish();
     updateTop();
     const i = queue[pos];
@@ -881,6 +917,7 @@ function renderTasks(s, t, only) {
     );
     dock.replaceChildren(panel);
     next.focus({ preventScroll: true });
+    if (ok) sfx.correct(); else sfx.wrong();
     if (ok) requestAnimationFrame(() => celebrate(panel));
   }
 
@@ -893,6 +930,7 @@ function renderTasks(s, t, only) {
     const message = open.length === 0 ? 'Alles richtig. Sehr gut.'
       : skipped === open.length ? 'Gut gemacht. Probiere jetzt noch die übersprungenen Aufgaben.'
       : right / queue.length >= 0.6 ? 'Gut gemacht. Wiederhole die falschen Aufgaben, um sie zu festigen.'
+      : s === FUN ? 'Da geht noch was. Versuch es gleich nochmal.'
       : 'Lies dir die Theorie noch einmal durch und versuche es dann erneut.';
     const repeatLabel = skipped === 0 ? 'Falsche wiederholen'
       : skipped === open.length ? 'Übersprungene machen'
@@ -903,10 +941,11 @@ function renderTasks(s, t, only) {
       h('p', { class: 'lead' }, message),
       skipped ? h('p', { class: 'result-note' }, `${skipped} ${skipped === 1 ? 'Aufgabe' : 'Aufgaben'} übersprungen`) : null,
     ));
+    if (t.theme === 'jojo') toBeContinued(stage);
     dock.replaceChildren(h('div', { class: 'btn-stack' },
       open.length ? h('button', { class: 'btn primary', onclick: () => renderTasks(s, t, open) }, repeatLabel) : null,
       h('button', { class: `btn ${open.length ? 'secondary' : 'primary'}`, onclick: () => renderTasks(s, t) }, 'Alle nochmal'),
-      h('a', { class: 'btn secondary', ...go(school(s.id, t.id)) }, 'Zum Thema'),
+      h('a', { class: 'btn secondary', ...go(back) }, t.backLabel || 'Zum Thema'),
     ));
   }
 
@@ -922,7 +961,8 @@ async function start() {
   route();
 }
 
-start();
+// Erst starten, wenn auch fun.js geladen ist
+document.addEventListener('DOMContentLoaded', start);
 
 // Beim lokalen Entwickeln automatisch neu laden, wenn sich eine Datei ändert
 if (['localhost', '127.0.0.1'].includes(location.hostname)) {

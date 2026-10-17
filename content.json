@@ -10,58 +10,120 @@
           "name": "Lineare Funktionen",
           "summary": "Geraden, Steigung und y-Achsenabschnitt.",
           "theory": [
-            { "type": "p", "text": "Eine **lineare Funktion** hat als Graphen eine Gerade. Man schreibt sie in der Form:" },
-            { "type": "formula", "text": "y = m · x + b" },
-            { "type": "list", "items": [
-              "**m** ist die Steigung: Um so viel ändert sich y, wenn x um 1 größer wird.",
-              "**b** ist der y-Achsenabschnitt: Dort schneidet die Gerade die y-Achse."
-            ] },
-            { "type": "h", "text": "Ausprobieren" },
-            { "type": "linear-explorer" },
-            { "type": "p", "text": "Verschiebe die Regler: **m** dreht die Gerade, **b** verschiebt sie nach oben oder unten." },
-            { "type": "h", "text": "Steigung aus zwei Punkten" },
-            { "type": "formula", "text": "m = (y₂ − y₁) / (x₂ − x₁)" },
-            { "type": "example", "steps": [
-              "Gegeben sind P(1 | 2) und Q(3 | 8).",
-              "m = (8 − 2) / (3 − 1) = 6 / 2 = **3**",
-              "Die Gerade steigt also um 3, wenn x um 1 größer wird."
-            ] },
-            { "type": "note", "text": "Ist m positiv, steigt die Gerade. Ist m negativ, fällt sie. Ist m = 0, verläuft sie waagerecht." }
+            {
+              "type": "p",
+              "text": "Eine **lineare Funktion** hat als Graphen eine Gerade. Man schreibt sie in der Form:"
+            },
+            {
+              "type": "formula",
+              "text": "y = m · x + b"
+            },
+            {
+              "type": "list",
+              "items": [
+                "**m** ist die Steigung: Um so viel ändert sich y, wenn x um 1 größer wird.",
+                "**b** ist der y-Achsenabschnitt: Dort schneidet die Gerade die y-Achse."
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Ausprobieren"
+            },
+            {
+              "type": "linear-explorer"
+            },
+            {
+              "type": "p",
+              "text": "Verschiebe die Regler: **m** dreht die Gerade, **b** verschiebt sie nach oben oder unten."
+            },
+            {
+              "type": "h",
+              "text": "Steigung aus zwei Punkten"
+            },
+            {
+              "type": "formula",
+              "text": "m = (y₂ − y₁) / (x₂ − x₁)"
+            },
+            {
+              "type": "example",
+              "steps": [
+                "Gegeben sind P(1 | 2) und Q(3 | 8).",
+                "m = (8 − 2) / (3 − 1) = 6 / 2 = **3**",
+                "Die Gerade steigt also um 3, wenn x um 1 größer wird."
+              ]
+            },
+            {
+              "type": "note",
+              "text": "Ist m positiv, steigt die Gerade. Ist m negativ, fällt sie. Ist m = 0, verläuft sie waagerecht."
+            }
           ],
           "tasks": [
             {
-              "id": "graph-1", "type": "graph",
+              "id": "graph-1",
+              "type": "graph",
               "prompt": "Stelle die Gerade so ein, dass sie durch beide Punkte verläuft.",
-              "m": 2, "b": -1, "points": [[0, -1], [2, 3]],
+              "m": 2,
+              "b": -1,
+              "points": [
+                [
+                  0,
+                  -1
+                ],
+                [
+                  2,
+                  3
+                ]
+              ],
               "explain": "Die Gerade schneidet die y-Achse bei −1, also b = −1. Von x = 0 bis x = 2 steigt y um 4, also m = 4 / 2 = 2."
             },
             {
-              "id": "steigung-1", "type": "input",
+              "id": "steigung-1",
+              "type": "input",
               "prompt": "Berechne die Steigung der Geraden durch P(1 | 2) und Q(3 | 8).",
               "answer": 3,
               "hint": "Nutze m = (y₂ − y₁) / (x₂ − x₁).",
               "explain": "m = (8 − 2) / (3 − 1) = 6 / 2 = 3"
             },
             {
-              "id": "faellt-1", "type": "choice",
+              "id": "faellt-1",
+              "type": "choice",
               "prompt": "Welche Gerade fällt?",
-              "options": ["y = 2x + 5", "y = −0,5x + 3", "y = 4", "y = x − 7"],
+              "options": [
+                "y = 2x + 5",
+                "y = −0,5x + 3",
+                "y = 4",
+                "y = x − 7"
+              ],
               "answer": 1,
               "explain": "Nur bei y = −0,5x + 3 ist die Steigung negativ. Deshalb fällt diese Gerade."
             },
             {
-              "id": "eigenschaften-1", "type": "match",
+              "id": "eigenschaften-1",
+              "type": "match",
               "prompt": "Ordne jeder Funktion ihre Eigenschaft zu.",
               "pairs": [
-                ["y = 3x", "geht durch den Ursprung"],
-                ["y = −x + 2", "fällt"],
-                ["y = 5", "verläuft waagerecht"],
-                ["y = 2x − 4", "schneidet die y-Achse bei −4"]
+                [
+                  "y = 3x",
+                  "geht durch den Ursprung"
+                ],
+                [
+                  "y = −x + 2",
+                  "fällt"
+                ],
+                [
+                  "y = 5",
+                  "verläuft waagerecht"
+                ],
+                [
+                  "y = 2x − 4",
+                  "schneidet die y-Achse bei −4"
+                ]
               ],
               "explain": "Ohne b geht die Gerade durch (0 | 0). Negatives m bedeutet fallend, m = 0 bedeutet waagerecht, und b ist der Schnittpunkt mit der y-Achse."
             },
             {
-              "id": "einsetzen-1", "type": "input",
+              "id": "einsetzen-1",
+              "type": "input",
               "prompt": "Gegeben ist y = 2x + 3. Welchen Wert hat y für x = 4?",
               "answer": 11,
               "hint": "Setze 4 für x ein.",
@@ -74,47 +136,85 @@
           "name": "Satz des Pythagoras",
           "summary": "Seitenlängen im rechtwinkligen Dreieck berechnen.",
           "theory": [
-            { "type": "p", "text": "In jedem **rechtwinkligen Dreieck** gilt für die Seitenlängen:" },
-            { "type": "formula", "text": "a² + b² = c²" },
-            { "type": "list", "items": [
-              "**a** und **b** sind die Katheten. Sie bilden den rechten Winkel.",
-              "**c** ist die Hypotenuse. Sie liegt dem rechten Winkel gegenüber und ist immer die längste Seite."
-            ] },
-            { "type": "h", "text": "Hypotenuse berechnen" },
-            { "type": "formula", "text": "c = √(a² + b²)" },
-            { "type": "example", "steps": [
-              "Gegeben: a = 6 cm, b = 8 cm",
-              "c = √(6² + 8²) = √(36 + 64) = √100",
-              "c = **10 cm**"
-            ] },
-            { "type": "h", "text": "Kathete berechnen" },
-            { "type": "formula", "text": "a = √(c² − b²)" },
-            { "type": "note", "text": "Prüfe immer zuerst, welche Seite die Hypotenuse ist. Suchst du eine Kathete, wird subtrahiert, suchst du die Hypotenuse, wird addiert." }
+            {
+              "type": "p",
+              "text": "In jedem **rechtwinkligen Dreieck** gilt für die Seitenlängen:"
+            },
+            {
+              "type": "formula",
+              "text": "a² + b² = c²"
+            },
+            {
+              "type": "list",
+              "items": [
+                "**a** und **b** sind die Katheten. Sie bilden den rechten Winkel.",
+                "**c** ist die Hypotenuse. Sie liegt dem rechten Winkel gegenüber und ist immer die längste Seite."
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Hypotenuse berechnen"
+            },
+            {
+              "type": "formula",
+              "text": "c = √(a² + b²)"
+            },
+            {
+              "type": "example",
+              "steps": [
+                "Gegeben: a = 6 cm, b = 8 cm",
+                "c = √(6² + 8²) = √(36 + 64) = √100",
+                "c = **10 cm**"
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Kathete berechnen"
+            },
+            {
+              "type": "formula",
+              "text": "a = √(c² − b²)"
+            },
+            {
+              "type": "note",
+              "text": "Prüfe immer zuerst, welche Seite die Hypotenuse ist. Suchst du eine Kathete, wird subtrahiert, suchst du die Hypotenuse, wird addiert."
+            }
           ],
           "tasks": [
             {
-              "id": "hypotenuse-1", "type": "input",
+              "id": "hypotenuse-1",
+              "type": "input",
               "prompt": "Die Katheten sind a = 3 cm und b = 4 cm. Wie lang ist die Hypotenuse c?",
-              "answer": 5, "unit": "cm",
+              "answer": 5,
+              "unit": "cm",
               "hint": "c = √(a² + b²)",
               "explain": "c = √(9 + 16) = √25 = 5 cm"
             },
             {
-              "id": "laengste-1", "type": "choice",
+              "id": "laengste-1",
+              "type": "choice",
               "prompt": "Welche Seite ist im rechtwinkligen Dreieck immer am längsten?",
-              "options": ["Die Kathete a", "Die Kathete b", "Die Hypotenuse c", "Das hängt vom Dreieck ab"],
+              "options": [
+                "Die Kathete a",
+                "Die Kathete b",
+                "Die Hypotenuse c",
+                "Das hängt vom Dreieck ab"
+              ],
               "answer": 2,
               "explain": "Die Hypotenuse liegt dem rechten Winkel gegenüber und ist deshalb immer die längste Seite."
             },
             {
-              "id": "kathete-1", "type": "input",
+              "id": "kathete-1",
+              "type": "input",
               "prompt": "Die Hypotenuse ist c = 13 cm, eine Kathete a = 5 cm. Wie lang ist b?",
-              "answer": 12, "unit": "cm",
+              "answer": 12,
+              "unit": "cm",
               "hint": "b = √(c² − a²)",
               "explain": "b = √(169 − 25) = √144 = 12 cm"
             },
             {
-              "id": "schritte-1", "type": "order",
+              "id": "schritte-1",
+              "type": "order",
               "prompt": "Bringe die Rechenschritte in die richtige Reihenfolge (a = 6, b = 8).",
               "items": [
                 "Formel aufschreiben: c² = a² + b²",
@@ -139,44 +239,83 @@
           "name": "Wortarten",
           "summary": "Nomen, Verben, Adjektive und Präpositionen erkennen.",
           "theory": [
-            { "type": "p", "text": "Jedes Wort gehört zu einer **Wortart**. Die wichtigsten sind:" },
-            { "type": "list", "items": [
-              "**Nomen** bezeichnen Lebewesen, Dinge oder Gedanken und werden großgeschrieben: Haus, Freude, Lehrerin.",
-              "**Verben** beschreiben, was jemand tut oder was passiert: laufen, denken, regnen.",
-              "**Adjektive** beschreiben, wie etwas ist: schnell, freundlich, groß.",
-              "**Präpositionen** zeigen Beziehungen, oft räumlich oder zeitlich: auf, unter, nach, während."
-            ] },
-            { "type": "h", "text": "Proben" },
-            { "type": "example", "title": "So erkennst du die Wortart", "steps": [
-              "**Artikelprobe:** Passt der, die oder das davor? Dann ist es ein Nomen.",
-              "**Ich-Probe:** Kann man es mit ich verbinden (ich laufe)? Dann ist es ein Verb.",
-              "**Wie-Probe:** Antwortet es auf die Frage Wie ist etwas? Dann ist es ein Adjektiv."
-            ] },
-            { "type": "note", "text": "Achtung: Auch Verben und Adjektive können zu Nomen werden, zum Beispiel beim Laufen oder das Gute." }
+            {
+              "type": "p",
+              "text": "Jedes Wort gehört zu einer **Wortart**. Die wichtigsten sind:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "**Nomen** bezeichnen Lebewesen, Dinge oder Gedanken und werden großgeschrieben: Haus, Freude, Lehrerin.",
+                "**Verben** beschreiben, was jemand tut oder was passiert: laufen, denken, regnen.",
+                "**Adjektive** beschreiben, wie etwas ist: schnell, freundlich, groß.",
+                "**Präpositionen** zeigen Beziehungen, oft räumlich oder zeitlich: auf, unter, nach, während."
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Proben"
+            },
+            {
+              "type": "example",
+              "title": "So erkennst du die Wortart",
+              "steps": [
+                "**Artikelprobe:** Passt der, die oder das davor? Dann ist es ein Nomen.",
+                "**Ich-Probe:** Kann man es mit ich verbinden (ich laufe)? Dann ist es ein Verb.",
+                "**Wie-Probe:** Antwortet es auf die Frage Wie ist etwas? Dann ist es ein Adjektiv."
+              ]
+            },
+            {
+              "type": "note",
+              "text": "Achtung: Auch Verben und Adjektive können zu Nomen werden, zum Beispiel beim Laufen oder das Gute."
+            }
           ],
           "tasks": [
             {
-              "id": "zuordnen-1", "type": "match",
+              "id": "zuordnen-1",
+              "type": "match",
               "prompt": "Ordne jedem Wort seine Wortart zu.",
               "pairs": [
-                ["Haus", "Nomen"],
-                ["laufen", "Verb"],
-                ["schnell", "Adjektiv"],
-                ["unter", "Präposition"]
+                [
+                  "Haus",
+                  "Nomen"
+                ],
+                [
+                  "laufen",
+                  "Verb"
+                ],
+                [
+                  "schnell",
+                  "Adjektiv"
+                ],
+                [
+                  "unter",
+                  "Präposition"
+                ]
               ],
               "explain": "Haus passt zur Artikelprobe, laufen zur Ich-Probe, schnell zur Wie-Probe, und unter zeigt eine räumliche Beziehung."
             },
             {
-              "id": "luecken-1", "type": "gap",
+              "id": "luecken-1",
+              "type": "gap",
               "prompt": "Ergänze ein Adjektiv, ein Verb und eine Präposition.",
               "text": "Der [kleine] Hund [rennt] [über] die Wiese.",
-              "distractors": ["Baum", "Freude"],
+              "distractors": [
+                "Baum",
+                "Freude"
+              ],
               "explain": "kleine beschreibt den Hund (Adjektiv), rennt ist die Tätigkeit (Verb), über zeigt die Richtung (Präposition)."
             },
             {
-              "id": "adjektiv-1", "type": "choice",
+              "id": "adjektiv-1",
+              "type": "choice",
               "prompt": "Welches Wort ist ein Adjektiv?",
-              "options": ["Freude", "freundlich", "freuen", "Freund"],
+              "options": [
+                "Freude",
+                "freundlich",
+                "freuen",
+                "Freund"
+              ],
               "answer": 1,
               "explain": "freundlich beantwortet die Frage Wie ist jemand? Freude und Freund sind Nomen, freuen ist ein Verb."
             }
@@ -194,54 +333,382 @@
           "name": "Simple Past",
           "summary": "Über abgeschlossene Ereignisse in der Vergangenheit sprechen.",
           "theory": [
-            { "type": "p", "text": "Das **Simple Past** verwendest du für Handlungen, die in der Vergangenheit abgeschlossen sind." },
-            { "type": "note", "text": "Signalwörter: yesterday, last week, two days ago, in 2020" },
-            { "type": "h", "text": "Regelmäßige Verben" },
-            { "type": "p", "text": "Du hängst **-ed** an die Grundform." },
-            { "type": "example", "steps": ["play → played", "watch → watched", "live → lived"] },
-            { "type": "h", "text": "Unregelmäßige Verben" },
-            { "type": "p", "text": "Viele häufige Verben haben eine eigene Form, die du auswendig lernen musst." },
-            { "type": "list", "items": ["go → **went**", "see → **saw**", "have → **had**", "buy → **bought**", "take → **took**"] },
-            { "type": "h", "text": "Verneinung und Fragen" },
-            { "type": "formula", "text": "did not (didn't) + Grundform" },
-            { "type": "example", "steps": ["I **didn't go** to school.", "**Did** you **see** the film?"] },
-            { "type": "note", "text": "Nach did steht immer die Grundform. Did you went ist falsch, richtig ist Did you go." }
+            {
+              "type": "p",
+              "text": "Das **Simple Past** verwendest du für Handlungen, die in der Vergangenheit abgeschlossen sind."
+            },
+            {
+              "type": "note",
+              "text": "Signalwörter: yesterday, last week, two days ago, in 2020"
+            },
+            {
+              "type": "h",
+              "text": "Regelmäßige Verben"
+            },
+            {
+              "type": "p",
+              "text": "Du hängst **-ed** an die Grundform."
+            },
+            {
+              "type": "example",
+              "steps": [
+                "play → played",
+                "watch → watched",
+                "live → lived"
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Unregelmäßige Verben"
+            },
+            {
+              "type": "p",
+              "text": "Viele häufige Verben haben eine eigene Form, die du auswendig lernen musst."
+            },
+            {
+              "type": "list",
+              "items": [
+                "go → **went**",
+                "see → **saw**",
+                "have → **had**",
+                "buy → **bought**",
+                "take → **took**"
+              ]
+            },
+            {
+              "type": "h",
+              "text": "Verneinung und Fragen"
+            },
+            {
+              "type": "formula",
+              "text": "did not (didn't) + Grundform"
+            },
+            {
+              "type": "example",
+              "steps": [
+                "I **didn't go** to school.",
+                "**Did** you **see** the film?"
+              ]
+            },
+            {
+              "type": "note",
+              "text": "Nach did steht immer die Grundform. Did you went ist falsch, richtig ist Did you go."
+            }
           ],
           "tasks": [
             {
-              "id": "luecken-1", "type": "gap",
+              "id": "luecken-1",
+              "type": "gap",
               "prompt": "Ergänze die Sätze im Simple Past.",
               "text": "Yesterday I [went] to the cinema and [saw] a great film.",
-              "distractors": ["go", "seen", "goed"],
+              "distractors": [
+                "go",
+                "seen",
+                "goed"
+              ],
               "explain": "go und see sind unregelmäßig: go → went, see → saw."
             },
             {
-              "id": "verben-1", "type": "match",
+              "id": "verben-1",
+              "type": "match",
               "prompt": "Ordne jedem Verb seine Simple-Past-Form zu.",
-              "pairs": [["go", "went"], ["buy", "bought"], ["have", "had"], ["take", "took"]],
+              "pairs": [
+                [
+                  "go",
+                  "went"
+                ],
+                [
+                  "buy",
+                  "bought"
+                ],
+                [
+                  "have",
+                  "had"
+                ],
+                [
+                  "take",
+                  "took"
+                ]
+              ],
               "explain": "Diese vier Verben sind unregelmäßig und kommen sehr häufig vor."
             },
             {
-              "id": "watch-1", "type": "input",
+              "id": "watch-1",
+              "type": "input",
               "prompt": "Setze das Verb ins Simple Past: She (watch) TV last night.",
-              "answer": "watched", "numeric": false,
+              "answer": "watched",
+              "numeric": false,
               "hint": "watch ist ein regelmäßiges Verb.",
               "explain": "Regelmäßig: watch + ed = watched."
             },
             {
-              "id": "satz-1", "type": "order",
+              "id": "satz-1",
+              "type": "order",
               "prompt": "Bringe die Wörter in die richtige Reihenfolge.",
-              "items": ["Did", "you", "play", "football", "yesterday?"],
+              "items": [
+                "Did",
+                "you",
+                "play",
+                "football",
+                "yesterday?"
+              ],
               "explain": "Fragen im Simple Past: Did + Subjekt + Grundform + Rest."
             },
             {
-              "id": "richtig-1", "type": "choice",
+              "id": "richtig-1",
+              "type": "choice",
               "prompt": "Welcher Satz ist richtig?",
-              "options": ["He didn't went home.", "He didn't go home.", "He don't went home.", "He not go home."],
+              "options": [
+                "He didn't went home.",
+                "He didn't go home.",
+                "He don't went home.",
+                "He not go home."
+              ],
               "answer": 1,
               "explain": "Nach didn't steht die Grundform: He didn't go home."
             }
           ]
+        }
+      ]
+    }
+  ],
+  "fun": [
+    {
+      "id": "jojo",
+      "name": "JoJo's Bizarre Adventure",
+      "short": "JJ",
+      "description": "10 Fragen quer durch die Parts",
+      "theme": "jojo",
+      "sound": true,
+      "tasks": [
+        {
+          "id": "groesse",
+          "type": "scale",
+          "prompt": "Zieh Jotaro auf seine offizielle Größe. Koichi und Iggy stehen zum Vergleich daneben.",
+          "figures": [
+            {
+              "name": "Koichi",
+              "cm": 157,
+              "kind": "human"
+            },
+            {
+              "name": "Jotaro",
+              "kind": "jotaro",
+              "target": 195,
+              "start": 150
+            },
+            {
+              "name": "Iggy",
+              "cm": 35,
+              "kind": "dog"
+            }
+          ],
+          "tolerance": 4,
+          "explain": "Jotaro Kujo ist 195 cm groß. Koichi Hirose ist zu Beginn von Teil 4 nur 157 cm."
+        },
+        {
+          "id": "schreie",
+          "type": "match",
+          "prompt": "Ordne jeden Kampfschrei dem passenden Stand zu.",
+          "pairs": [
+            [
+              "ORA ORA ORA",
+              "Star Platinum"
+            ],
+            [
+              "DORARARARA",
+              "Crazy Diamond"
+            ],
+            [
+              "ARI ARI ARI",
+              "Sticky Fingers"
+            ],
+            [
+              "VOLA VOLA VOLA",
+              "Aerosmith"
+            ]
+          ],
+          "explain": "Jotaro, Josuke, Bucciarati und Narancia rufen diese Schreie, wenn ihre Stands angreifen."
+        },
+        {
+          "id": "zawarudo",
+          "type": "timestop",
+          "prompt": "Wie lange kann DIO im Endkampf gegen Jotaro die Zeit anhalten? Drück **ZA WARUDO** und lass die Zeit genau so viele Sekunden stehen.",
+          "answer": 9,
+          "explain": "Nachdem DIO Josephs Blut getrunken hat, kann er die Zeit für 9 Sekunden anhalten."
+        },
+        {
+          "id": "stammbaum",
+          "type": "family",
+          "prompt": "Vervollständige den Stammbaum der Joestars.",
+          "nodes": [
+            {
+              "id": "jonathan",
+              "name": "Jonathan",
+              "x": 50,
+              "y": 6
+            },
+            {
+              "id": "george",
+              "name": "George II",
+              "x": 50,
+              "y": 22
+            },
+            {
+              "id": "joseph",
+              "slot": "Joseph",
+              "x": 50,
+              "y": 38
+            },
+            {
+              "id": "holly",
+              "name": "Holly",
+              "x": 27,
+              "y": 56
+            },
+            {
+              "id": "josuke",
+              "slot": "Josuke",
+              "x": 74,
+              "y": 56
+            },
+            {
+              "id": "jotaro",
+              "slot": "Jotaro",
+              "x": 27,
+              "y": 75
+            },
+            {
+              "id": "jolyne",
+              "slot": "Jolyne",
+              "x": 27,
+              "y": 94
+            }
+          ],
+          "edges": [
+            [
+              "jonathan",
+              "george"
+            ],
+            [
+              "george",
+              "joseph"
+            ],
+            [
+              "joseph",
+              "holly"
+            ],
+            [
+              "joseph",
+              "josuke"
+            ],
+            [
+              "holly",
+              "jotaro"
+            ],
+            [
+              "jotaro",
+              "jolyne"
+            ]
+          ],
+          "distractors": [
+            "Giorno",
+            "Dio"
+          ],
+          "explain": "Joseph ist Jonathans Enkel. Seine Tochter Holly ist Jotaros Mutter, Josuke ist Josephs unehelicher Sohn und Jolyne ist Jotaros Tochter."
+        },
+        {
+          "id": "reise",
+          "type": "order",
+          "prompt": "Bring die Stationen der Reise aus Stardust Crusaders in die richtige Reihenfolge.",
+          "items": [
+            "Hongkong",
+            "Singapur",
+            "Kalkutta (Indien)",
+            "Karatschi (Pakistan)",
+            "Assuan (Ägypten)",
+            "Kairo (Ägypten)"
+          ],
+          "explain": "Von Hongkong geht es per Schiff nach Singapur, dann durch Indien und Pakistan bis nach Ägypten, wo DIO in Kairo wartet."
+        },
+        {
+          "id": "werte",
+          "type": "radar",
+          "prompt": "Stell die Stand-Werte von Star Platinum ein.",
+          "stats": [
+            {
+              "label": "Zerstörungskraft",
+              "short": "Kraft",
+              "answer": "A"
+            },
+            {
+              "label": "Geschwindigkeit",
+              "short": "Tempo",
+              "answer": "A"
+            },
+            {
+              "label": "Reichweite",
+              "short": "Reichweite",
+              "answer": "C"
+            },
+            {
+              "label": "Ausdauer",
+              "short": "Ausdauer",
+              "answer": "A"
+            },
+            {
+              "label": "Präzision",
+              "short": "Präzision",
+              "answer": "A"
+            },
+            {
+              "label": "Entwicklungspotenzial",
+              "short": "Potenzial",
+              "answer": "A"
+            }
+          ],
+          "explain": "Star Platinum hat überall A, nur die Reichweite ist C. Er kämpft also nur auf kurze Distanz."
+        },
+        {
+          "id": "orte",
+          "type": "gap",
+          "prompt": "Wo spielen die Parts? Zieh die Orte in die Lücken.",
+          "text": "Teil 1 spielt in [England], Teil 4 in der Kleinstadt [Morioh], Teil 5 in [Italien] und Teil 6 in [Florida].",
+          "distractors": [
+            "Kairo",
+            "New York"
+          ],
+          "explain": "Phantom Blood spielt in England, Diamond is Unbreakable in Morioh, Golden Wind in Italien und Stone Ocean in einem Gefängnis in Florida."
+        },
+        {
+          "id": "kira",
+          "type": "input",
+          "prompt": "Yoshikage Kira stellt sich gern ausführlich vor. Wie alt ist er?",
+          "answer": 33,
+          "unit": "Jahre",
+          "hint": "Es ist eine Schnapszahl.",
+          "explain": "Mein Name ist Yoshikage Kira. Ich bin 33 Jahre alt."
+        },
+        {
+          "id": "dampfwalze",
+          "type": "choice",
+          "prompt": "Was ruft DIO, als er Jotaro mit einem schweren Fahrzeug zerquetschen will?",
+          "options": [
+            "ROAD ROLLER DA!",
+            "MUDA MUDA MUDA!",
+            "WRYYYYY!",
+            "ZA WARUDO!"
+          ],
+          "answer": 0,
+          "explain": "DIO lässt eine Dampfwalze auf Jotaro fallen und ruft dabei ROAD ROLLER DA!"
+        },
+        {
+          "id": "ora-rush",
+          "type": "rush",
+          "prompt": "Bonus: ORA-Rush! Tipp so schnell du kannst auf Star Platinums Faust.",
+          "goal": 30,
+          "seconds": 5,
+          "explain": "Star Platinum schlägt schneller, als ein Mensch schauen kann."
         }
       ]
     }

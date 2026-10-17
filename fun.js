@@ -82,6 +82,23 @@ const sfx = (() => {
       noise({ dur: 0.9, vol: 0.1, freq: 380 });
     }),
     resume: play(() => tone(55, { dur: 0.7, vol: 0.2, to: 640 })),
+    clack: play(() => {
+      noise({ dur: 0.04, vol: 0.35, freq: 3500 });
+      tone(220, { type: 'square', dur: 0.03, vol: 0.05 });
+    }),
+    ding: play(() => tone(2100, { dur: 0.6, vol: 0.08 })),
+    thunk: play(() => {
+      noise({ dur: 0.06, vol: 0.25, freq: 500 });
+      tone(110, { dur: 0.09, vol: 0.2, to: 70 });
+    }),
+    brew: play(() => {
+      tone(420, { type: 'triangle', dur: 0.18, vol: 0.12, to: 640 });
+      tone(640, { type: 'triangle', dur: 0.3, vol: 0.1, to: 880, delay: 0.12 });
+    }),
+    heartbeat: play(() => {
+      tone(60, { dur: 0.16, vol: 0.35, to: 40 });
+      tone(55, { dur: 0.18, vol: 0.28, to: 38, delay: 0.22 });
+    }),
     menacing: play(() => {
       tone(52, { type: 'sawtooth', dur: 1.4, vol: 0.05, to: 46 });
       tone(78, { type: 'sawtooth', dur: 1.2, vol: 0.03, to: 70, delay: 0.15 });
@@ -99,17 +116,42 @@ function soundToggle() {
 
 /* ================= Themen-Effekte ================= */
 
-// Schwebende ゴゴゴ-Zeichen am Rand, wie die bedrohlichen Soundeffekte im Manga
+const THEMES = {
+  // Schwebende ゴゴゴ-Zeichen am Rand, wie die bedrohlichen Soundeffekte im Manga
+  jojo: {
+    layer() {
+      const glyphs = Array.from({ length: 8 }, (_, i) => h('span', { style: `--i:${i}` }, 'ゴ'));
+      app.prepend(h('div', { class: 'menacing', 'aria-hidden': 'true' }, glyphs));
+      sfx.menacing();
+    },
+    finish(stage) {
+      stage.append(h('div', { class: 'tbc', 'aria-hidden': 'true' }, h('span', {}, 'TO BE CONTINUED')));
+    },
+  },
+  // Dunkle Ränder, Filmkorn und ein Herzschlag zum Start
+  re: {
+    layer() {
+      app.prepend(h('div', { class: 're-mood', 'aria-hidden': 'true' }));
+      sfx.heartbeat();
+    },
+    finish(stage, perfect) {
+      const text = perfect ? 'YOU SURVIVED' : 'YOU ARE DEAD';
+      const line = h('div', { class: `re-ending ${perfect ? 'alive' : 'dead'}` });
+      stage.append(line);
+      [...text].forEach((ch, i) => setTimeout(() => {
+        line.textContent += ch;
+        if (ch !== ' ') sfx.clack();
+      }, 500 + i * 90));
+    },
+  },
+};
+
 function themeLayer(theme) {
-  if (theme !== 'jojo') return;
-  const glyphs = Array.from({ length: 8 }, (_, i) => h('span', { style: `--i:${i}` }, 'ゴ'));
-  app.prepend(h('div', { class: 'menacing', 'aria-hidden': 'true' }, glyphs));
-  sfx.menacing();
+  THEMES[theme]?.layer();
 }
 
-function toBeContinued(stage) {
-  const arrow = h('div', { class: 'tbc', 'aria-hidden': 'true' }, h('span', {}, 'TO BE CONTINUED'));
-  stage.append(arrow);
+function themeFinish(theme, stage, perfect) {
+  THEMES[theme]?.finish(stage, perfect);
 }
 
 /* ================= Silhouetten ================= */
@@ -129,6 +171,13 @@ const SILHOUETTES = {
       + '<rect x="2.5" y="21" width="6" height="32" rx="3"/><rect x="31.5" y="21" width="6" height="32" rx="3"/>'
       + '<rect x="10.5" y="54" width="8.5" height="46" rx="3"/><rect x="21" y="54" width="8.5" height="46" rx="3"/>',
     view: '0 0 40 100',
+  },
+  lady: {
+    ratio: 50 / 100,
+    body: '<ellipse cx="25" cy="10" rx="23" ry="3.2"/><path d="M14.5 10c0-6.5 4.6-9.5 10.5-9.5S35.5 3.5 35.5 10z"/>'
+      + '<circle cx="25" cy="16" r="5.5"/><path d="M18 24c0-2 1.5-3 3.5-3h7c2 0 3.5 1 3.5 3l1.5 16h-17z"/>'
+      + '<path d="M16 39h18l12 61H4z"/><rect x="12" y="23" width="4.5" height="26" rx="2.2"/><rect x="33.5" y="23" width="4.5" height="26" rx="2.2"/>',
+    view: '0 0 50 100',
   },
   dog: {
     ratio: 60 / 40,
@@ -478,3 +527,226 @@ function enableHeightDrag(handle, get, set, perPixel) {
     window.addEventListener('pointercancel', end);
   });
 }
+
+/* ================= Resident Evil: Kräuter, Koffer, Schreibmaschine ================= */
+
+const LEAF = '<svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M4 20C4 10 10 4 20 4c0 10-6 16-16 16z" fill="var(--c)"/>'
+  + '<path d="M4 20L15 9" stroke="rgba(0,0,0,.35)" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>';
+
+function shake(el) {
+  el.classList.remove('shake');
+  void el.offsetWidth;
+  el.classList.add('shake');
+}
+
+Object.assign(TASKS, {
+  // Kräuter in eine Schale ziehen und mischen
+  mix: {
+    label: 'Kräuter mischen',
+    render(task, ctx) {
+      const added = [];
+      const herbById = Object.fromEntries(task.herbs.map(x => [x.id, x]));
+      const leaf = color => h('span', { class: 'leaf', style: `--c:${color}`, html: LEAF });
+      const bowlItems = h('div', { class: 'bowl-items' });
+      const bowl = h('div', { class: 'bowl', 'data-drop': '' }, bowlItems, h('div', { class: 'bowl-hint' }, 'Schale'));
+
+      function paint() {
+        bowlItems.replaceChildren(...added.map((id, i) => h('button', {
+          class: 'bowl-herb', type: 'button', 'aria-label': `${herbById[id].name} entfernen`,
+          onclick() {
+            if (box.classList.contains('locked')) return;
+            added.splice(i, 1);
+            paint();
+          },
+        }, leaf(herbById[id].color))));
+        ctx.setReady(added.length > 0);
+      }
+      function add(id) {
+        if (added.length >= task.max) { shake(bowl); return; }
+        added.push(id);
+        sfx.brew();
+        paint();
+        bowl.classList.remove('splash');
+        void bowl.offsetWidth;
+        bowl.classList.add('splash');
+      }
+
+      const shelf = h('div', { class: 'herb-shelf' }, task.herbs.map(herb => {
+        const el = h('button', { class: 'herb', type: 'button' }, leaf(herb.color), h('span', {}, herb.name));
+        enableDrag(el, { onTap: () => add(herb.id), onDrop: target => { if (target === bowl) add(herb.id); } });
+        return el;
+      }));
+      const box = h('div', { class: 'mix' }, shelf, bowl,
+        h('p', { class: 'mix-note' }, `Höchstens ${task.max} Kräuter. Ein Kraut in der Schale antippen, um es zu entfernen.`));
+      return {
+        el: box,
+        check() {
+          box.classList.add('locked');
+          const ok = [...added].sort().join() === [...task.answer].sort().join();
+          bowl.classList.add(ok ? 'correct' : 'wrong');
+          return ok;
+        },
+      };
+    },
+  },
+
+  // Gegenstände in ein Koffer-Raster packen (Inventar aus Resident Evil 4)
+  inventory: {
+    label: 'Koffer packen',
+    render(task, ctx) {
+      const CELL = 46;
+      const { cols, rows } = task;
+      const preview = h('div', { class: 'case-preview', hidden: true });
+      const grid = h('div', { class: 'case-grid', style: `width:${cols * CELL}px;height:${rows * CELL}px;--cell:${CELL}px` }, preview);
+      const tray = h('div', { class: 'case-tray' });
+      const items = task.items.map(it => ({ ...it, x: null, y: null, el: null }));
+
+      const fits = (item, x, y, w, hh) => {
+        if (x < 0 || y < 0 || x + w > cols || y + hh > rows) return false;
+        return items.every(o => o === item || o.x === null
+          || x + w <= o.x || o.x + o.w <= x || y + hh <= o.y || o.y + o.h <= y);
+      };
+      const size = item => {
+        item.el.style.width = `${item.w * CELL}px`;
+        item.el.style.height = `${item.h * CELL}px`;
+        item.el.classList.toggle('tall', item.h > item.w);
+      };
+      const place = (item, x, y) => {
+        item.x = x;
+        item.y = y;
+        item.el.style.left = `${x * CELL}px`;
+        item.el.style.top = `${y * CELL}px`;
+        item.el.classList.add('placed');
+        grid.append(item.el);
+      };
+      const toTray = item => {
+        item.x = null;
+        item.y = null;
+        item.el.classList.remove('placed');
+        item.el.style.left = '';
+        item.el.style.top = '';
+        tray.append(item.el);
+      };
+      const changed = () => ctx.setReady(items.every(i => i.x !== null));
+
+      function rotate(item) {
+        if (item.w === item.h) return;
+        const w = item.h, hh = item.w;
+        if (item.x !== null && !fits(item, item.x, item.y, w, hh)) { shake(item.el); return; }
+        item.w = w;
+        item.h = hh;
+        size(item);
+        sfx.thunk();
+      }
+
+      function enableCaseDrag(item) {
+        const el = item.el;
+        el.addEventListener('pointerdown', e => {
+          if (el.closest('.locked') || e.button > 0) return;
+          e.preventDefault();
+          const rect = el.getBoundingClientRect();
+          const offX = e.clientX - rect.left, offY = e.clientY - rect.top;
+          const startX = e.clientX, startY = e.clientY;
+          let ghost = null;
+          let spot = null;
+
+          const move = ev => {
+            if (!ghost && Math.hypot(ev.clientX - startX, ev.clientY - startY) < 6) return;
+            if (!ghost) {
+              ghost = el.cloneNode(true);
+              ghost.classList.remove('placed');
+              ghost.classList.add('case-ghost');
+              ghost.style.left = '0px';
+              ghost.style.top = '0px';
+              document.body.append(ghost);
+              el.classList.add('lifting');
+            }
+            const gx = ev.clientX - offX, gy = ev.clientY - offY;
+            ghost.style.transform = `translate(${gx}px, ${gy}px)`;
+            const g = grid.getBoundingClientRect();
+            const over = ev.clientX > g.left - CELL / 2 && ev.clientX < g.right + CELL / 2
+              && ev.clientY > g.top - CELL / 2 && ev.clientY < g.bottom + CELL / 2;
+            if (!over) { spot = null; preview.hidden = true; return; }
+            const x = Math.round((gx - g.left) / CELL), y = Math.round((gy - g.top) / CELL);
+            spot = { x, y, ok: fits(item, x, y, item.w, item.h) };
+            preview.hidden = false;
+            preview.className = `case-preview ${spot.ok ? 'ok' : 'bad'}`;
+            preview.style.left = `${x * CELL}px`;
+            preview.style.top = `${y * CELL}px`;
+            preview.style.width = `${item.w * CELL}px`;
+            preview.style.height = `${item.h * CELL}px`;
+          };
+          const end = ev => {
+            window.removeEventListener('pointermove', move);
+            window.removeEventListener('pointerup', end);
+            window.removeEventListener('pointercancel', end);
+            preview.hidden = true;
+            if (!ghost) {
+              if (ev.type === 'pointerup') rotate(item);
+              return;
+            }
+            ghost.remove();
+            el.classList.remove('lifting');
+            if (ev.type !== 'pointerup') return;
+            if (spot?.ok) { place(item, spot.x, spot.y); sfx.thunk(); }
+            else if (!spot) toTray(item);
+            else shake(el);
+            changed();
+          };
+          window.addEventListener('pointermove', move);
+          window.addEventListener('pointerup', end);
+          window.addEventListener('pointercancel', end);
+        });
+      }
+
+      for (const item of items) {
+        item.el = h('div', { class: 'case-item', style: `--c:${item.color}` }, h('span', {}, item.name));
+        size(item);
+        enableCaseDrag(item);
+        tray.append(item.el);
+      }
+      const box = h('div', { class: 'case' }, h('div', { class: 'case-shell' }, grid), tray);
+      return {
+        el: box,
+        check() {
+          box.classList.add('locked');
+          return items.every(i => i.x !== null);
+        },
+      };
+    },
+  },
+
+  // Fehlendes Wort auf einer Schreibmaschine tippen
+  typewriter: {
+    label: 'Schreibmaschine',
+    render(task, ctx) {
+      const field = h('input', {
+        class: 'tw-input', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false',
+        'aria-label': 'Fehlendes Wort', size: Math.max(6, task.answer.length),
+      });
+      field.addEventListener('input', () => { sfx.clack(); ctx.setReady(field.value.trim() !== ''); });
+      field.addEventListener('keydown', e => { if (e.key === 'Enter') ctx.submit(); });
+      const extra = h('div');
+      const ribbon = h('div', { class: 'tw-ribbon' }, 'Farbband × 1');
+      const paper = h('div', { class: 'tw-paper' }, h('span', {}, `${task.before} `), field, h('span', {}, task.after));
+      let tries = 0;
+      return {
+        el: h('div', { class: 'tw' }, paper, ribbon, extra),
+        check() {
+          const ok = matchesAnswer(field.value, task.answer);
+          if (!ok && task.hint && tries++ === 0) {
+            shake(paper);
+            extra.replaceChildren(rich('div', `**Noch nicht.** Tipp: ${task.hint}`, { class: 'hint' }));
+            return 'retry';
+          }
+          field.disabled = true;
+          field.classList.add(ok ? 'correct' : 'wrong');
+          ribbon.textContent = ok ? 'Gespeichert.' : 'Farbband × 0';
+          if (ok) sfx.ding();
+          else extra.replaceChildren(h('div', { class: 'reveal' }, 'Richtig wäre: ', h('strong', {}, task.answer)));
+          return ok;
+        },
+      };
+    },
+  },
+});

@@ -588,3 +588,105 @@ body.time-stopped::after {
 @media (prefers-reduced-motion: reduce) {
   .menacing span, .tbc, .ts-ripple, .ora { animation-duration: .01s; }
 }
+
+/* ================= Resident Evil ================= */
+.shake { animation: shake .35s ease; }
+body[data-theme="re"] .task-type { font-family: "Special Elite", Inter, monospace; font-weight: 400; letter-spacing: .1em; color: #d8453b; }
+.re-mood {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, .65) 100%);
+}
+.re-mood::after {
+  content: ""; position: absolute; inset: -50%; opacity: .07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain .6s steps(4) infinite;
+}
+@keyframes grain {
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-1%, 3%); }
+}
+.re-ending {
+  min-height: 1.2em; margin-top: 34px; text-align: center;
+  font: 400 34px/1.1 "Special Elite", monospace; letter-spacing: .06em;
+}
+.re-ending.dead { color: #d8453b; text-shadow: 0 0 18px rgba(216, 69, 59, .5); }
+.re-ending.alive { color: #8fd18a; text-shadow: 0 0 18px rgba(143, 209, 138, .35); }
+
+/* Kräuter mischen */
+.mix { display: grid; gap: 18px; justify-items: center; }
+.herb-shelf { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.herb {
+  display: grid; justify-items: center; gap: 4px; width: 84px; padding: 10px 6px 8px;
+  border-radius: 14px; background: var(--surface); border: 1.5px solid var(--line);
+  font-size: 13px; font-weight: 600; color: var(--muted);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.herb .leaf { width: 40px; height: 40px; }
+.leaf { display: block; }
+.bowl {
+  position: relative; width: 220px; height: 120px;
+  border-radius: 0 0 110px 110px; border: 3px solid var(--faint); border-top-width: 6px;
+  background: linear-gradient(var(--surface-2), var(--surface));
+  display: grid; place-items: center; transition: border-color .2s, box-shadow .2s;
+}
+.bowl.over { border-color: var(--accent); }
+.bowl.splash { animation: splash .35s ease; }
+@keyframes splash { 40% { transform: scale(1.04, .96); } }
+.bowl.correct { border-color: var(--ok); box-shadow: 0 0 30px color-mix(in srgb, var(--ok) 45%, transparent); }
+.bowl.wrong { border-color: var(--bad); }
+.bowl-items { display: flex; gap: 6px; }
+.bowl-herb { width: 44px; height: 44px; padding: 2px; animation: drop-in .3s cubic-bezier(.3, 1.5, .5, 1); }
+.bowl-herb .leaf { width: 100%; height: 100%; }
+@keyframes drop-in { from { transform: translateY(-30px) rotate(-30deg); opacity: 0; } }
+.bowl-hint { position: absolute; bottom: 10px; font-size: 11px; color: var(--faint); letter-spacing: .1em; text-transform: uppercase; }
+.mix-note { font-size: 14px; color: var(--muted); text-align: center; }
+
+/* Koffer packen */
+.case { display: grid; gap: 18px; justify-items: center; }
+.case-shell {
+  padding: 10px; border-radius: 12px;
+  background: #2b2a24; border: 3px solid #4a4335; box-shadow: inset 0 0 0 2px #1b1a16, var(--lift);
+}
+.case-grid {
+  position: relative;
+  background-color: #1d2a20;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px);
+  background-size: var(--cell) var(--cell);
+}
+.case-tray { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: flex-start; min-height: 60px; }
+.case-item {
+  position: relative; flex: none; display: grid; place-items: center;
+  border-radius: 6px; background: var(--c);
+  border: 1.5px solid rgba(255, 255, 255, .25); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25);
+  color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+}
+.case-item.tall span { writing-mode: vertical-rl; transform: rotate(180deg); }
+.case-item.placed { position: absolute; }
+.case-item.lifting { opacity: .25; }
+.case-ghost { position: fixed; z-index: 100; pointer-events: none; box-shadow: var(--lift); }
+.case-preview { position: absolute; border-radius: 6px; pointer-events: none; z-index: 0; }
+.case-preview.ok { background: rgba(120, 220, 120, .25); outline: 2px solid rgba(120, 220, 120, .8); }
+.case-preview.bad { background: rgba(230, 80, 70, .25); outline: 2px solid rgba(230, 80, 70, .8); }
+.locked .case-item { cursor: default; }
+
+/* Schreibmaschine */
+.tw { display: grid; gap: 10px; }
+.tw-paper {
+  padding: 26px 20px; border-radius: 4px;
+  background: #ece4d2; color: #22201b;
+  font: 400 21px/1.6 "Special Elite", monospace;
+  box-shadow: 0 2px 0 #c9bfa8, var(--lift);
+  background-image: repeating-linear-gradient(transparent 0 33px, rgba(80, 60, 30, .12) 33px 34px);
+}
+.tw-input {
+  width: auto; max-width: 100%; padding: 0 4px;
+  font: inherit; color: #7a1a12; background: transparent;
+  border: 0; border-bottom: 2px solid #22201b; outline: none; border-radius: 0;
+}
+.tw-input.correct { color: #1d6a35; border-color: #1d6a35; }
+.tw-input.wrong { color: #a3261b; text-decoration: line-through; }
+.tw-ribbon { font: 400 13px/1 "Special Elite", monospace; color: var(--muted); text-align: right; }

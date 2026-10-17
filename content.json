@@ -711,6 +711,225 @@
           "explain": "Star Platinum schlägt schneller, als ein Mensch schauen kann."
         }
       ]
+    },
+    {
+      "id": "resident-evil",
+      "name": "Resident Evil",
+      "short": "RE",
+      "description": "10 Fragen und 2 Mini-Spiele",
+      "theme": "re",
+      "sound": true,
+      "tasks": [
+        {
+          "id": "dimitrescu",
+          "type": "scale",
+          "prompt": "Zieh Lady Dimitrescu auf ihre offizielle Größe. Daneben steht ein Mensch mit 1,80 m.",
+          "max": 320,
+          "figures": [
+            {
+              "name": "1,80 m",
+              "cm": 180,
+              "kind": "human"
+            },
+            {
+              "name": "Lady Dimitrescu",
+              "kind": "lady",
+              "target": 290,
+              "start": 190
+            }
+          ],
+          "tolerance": 8,
+          "explain": "Laut Capcom ist Lady Dimitrescu 2,90 m groß, mit Hut und hohen Absätzen."
+        },
+        {
+          "id": "kraeuter",
+          "type": "mix",
+          "prompt": "Mini-Spiel: Misch ein Heilmittel, das dich **voll heilt und Gift entfernt**. Zieh die Kräuter in die Schale.",
+          "herbs": [
+            {
+              "id": "g",
+              "name": "Grün",
+              "color": "#4caf5c"
+            },
+            {
+              "id": "r",
+              "name": "Rot",
+              "color": "#d8453b"
+            },
+            {
+              "id": "b",
+              "name": "Blau",
+              "color": "#3f7fe0"
+            }
+          ],
+          "max": 3,
+          "answer": [
+            "g",
+            "r",
+            "b"
+          ],
+          "explain": "Grün heilt, Rot verstärkt Grün zur vollen Heilung und Blau entfernt Gift. Zusammen schaffen sie beides."
+        },
+        {
+          "id": "erreger",
+          "type": "match",
+          "prompt": "Ordne jeden Erreger dem Spiel zu, in dem er im Mittelpunkt steht.",
+          "pairs": [
+            [
+              "T-Virus",
+              "Resident Evil (1996)"
+            ],
+            [
+              "G-Virus",
+              "Resident Evil 2"
+            ],
+            [
+              "Las Plagas",
+              "Resident Evil 4"
+            ],
+            [
+              "Schimmel (Mold)",
+              "Resident Evil 7"
+            ]
+          ],
+          "explain": "Umbrellas T-Virus startet alles, William Birkin entwickelt das G-Virus, in Spanien warten Las Plagas und bei den Bakers der Schimmel."
+        },
+        {
+          "id": "koffer",
+          "type": "inventory",
+          "prompt": "Mini-Spiel: Pack alles in den Koffer. Ziehen verschiebt ein Teil, Antippen dreht es.",
+          "cols": 6,
+          "rows": 4,
+          "items": [
+            {
+              "id": "shotgun",
+              "name": "Schrotflinte",
+              "w": 6,
+              "h": 1,
+              "color": "#6b5a44"
+            },
+            {
+              "id": "handgun",
+              "name": "Pistole",
+              "w": 3,
+              "h": 2,
+              "color": "#4d5560"
+            },
+            {
+              "id": "ammo",
+              "name": "Munition",
+              "w": 2,
+              "h": 2,
+              "color": "#8a6b2f"
+            },
+            {
+              "id": "spray",
+              "name": "Spray",
+              "w": 1,
+              "h": 2,
+              "color": "#2f6f7a"
+            },
+            {
+              "id": "knife",
+              "name": "Messer",
+              "w": 3,
+              "h": 1,
+              "color": "#5d6670"
+            },
+            {
+              "id": "green",
+              "name": "Kraut",
+              "w": 1,
+              "h": 1,
+              "color": "#3e8f4b"
+            },
+            {
+              "id": "red",
+              "name": "Kraut",
+              "w": 1,
+              "h": 1,
+              "color": "#a83a32"
+            },
+            {
+              "id": "grenade",
+              "name": "Granate",
+              "w": 1,
+              "h": 1,
+              "color": "#56613b"
+            }
+          ],
+          "explain": "Im Koffer aus Resident Evil 4 zählt jedes Feld. Alles passt genau hinein."
+        },
+        {
+          "id": "reihenfolge",
+          "type": "order",
+          "prompt": "Bring die Spiele in die Reihenfolge, in der sie erschienen sind.",
+          "items": [
+            "Resident Evil",
+            "Resident Evil 2",
+            "Resident Evil 4",
+            "Resident Evil 5",
+            "Resident Evil 7",
+            "Resident Evil Village"
+          ],
+          "explain": "1996, 1998, 2005, 2009, 2017 und 2021."
+        },
+        {
+          "id": "sandwich",
+          "type": "typewriter",
+          "prompt": "Barry Burton rettet Jill in letzter Sekunde vor einer herabsinkenden Decke. Vervollständige seinen berühmten Satz.",
+          "before": "You were almost a Jill",
+          "after": "!",
+          "answer": "sandwich",
+          "hint": "Etwas zum Essen, mit Brot oben und unten.",
+          "explain": "„You were almost a Jill sandwich!“ ist einer der bekanntesten Sätze der Reihe."
+        },
+        {
+          "id": "stars",
+          "type": "gap",
+          "prompt": "Wer ist wer? Zieh die Begriffe in die Lücken.",
+          "text": "Chris Redfield und [Jill] Valentine gehören zum Team [S.T.A.R.S.]. Ihr Captain [Albert Wesker] ist ein Verräter. Claire Redfield ist Chris' [Schwester].",
+          "distractors": [
+            "Leon",
+            "Umbrella"
+          ],
+          "explain": "S.T.A.R.S. ist die Spezialeinheit der Polizei von Raccoon City. Wesker arbeitet heimlich für Umbrella."
+        },
+        {
+          "id": "raccoon",
+          "type": "input",
+          "prompt": "In welchem Jahr wird Raccoon City zerstört?",
+          "answer": 1998,
+          "hint": "Es passiert in Resident Evil 2 und 3, die beide im selben Jahr spielen.",
+          "explain": "Raccoon City wird am 1. Oktober 1998 durch eine Rakete ausgelöscht."
+        },
+        {
+          "id": "ashley",
+          "type": "choice",
+          "prompt": "Wen soll Leon in Resident Evil 4 retten?",
+          "options": [
+            "Sherry Birkin",
+            "Ashley Graham",
+            "Claire Redfield",
+            "Ada Wong"
+          ],
+          "answer": 1,
+          "explain": "Ashley Graham ist die Tochter des US-Präsidenten und wurde nach Spanien entführt."
+        },
+        {
+          "id": "mr-x",
+          "type": "choice",
+          "prompt": "Schwere Schritte im Polizeirevier … Wer verfolgt dich im Remake von Resident Evil 2?",
+          "options": [
+            "Nemesis",
+            "Jack Baker",
+            "Mr. X",
+            "Der Duke"
+          ],
+          "answer": 2,
+          "explain": "Mr. X ist ein Tyrant, der Leon und Claire durch das Revier jagt. Nemesis kommt erst in Resident Evil 3."
+        }
+      ]
     }
   ]
 }

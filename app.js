@@ -941,7 +941,7 @@ function renderTasks(s, t, only) {
       h('p', { class: 'lead' }, message),
       skipped ? h('p', { class: 'result-note' }, `${skipped} ${skipped === 1 ? 'Aufgabe' : 'Aufgaben'} übersprungen`) : null,
     ));
-    if (t.theme === 'jojo') toBeContinued(stage);
+    if (t.theme) themeFinish(t.theme, stage, open.length === 0);
     dock.replaceChildren(h('div', { class: 'btn-stack' },
       open.length ? h('button', { class: 'btn primary', onclick: () => renderTasks(s, t, open) }, repeatLabel) : null,
       h('button', { class: `btn ${open.length ? 'secondary' : 'primary'}`, onclick: () => renderTasks(s, t) }, 'Alle nochmal'),

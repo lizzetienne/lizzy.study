@@ -24,6 +24,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;letter-spacing:.02em;text-wrap:balance}
 h2{font-family:var(--f-display);font-weight:500;font-size:22px;margin:0}
 .lead{margin:4px 0 0;color:var(--muted);max-width:65ch}
+.home{display:inline-block;margin-bottom:10px;font-family:var(--f-display);font-size:16px;color:var(--accent);text-decoration:none}
+.home:hover{text-decoration:underline}
 .stats{display:flex;flex-wrap:wrap;gap:8px 24px;font-family:var(--f-mono);font-size:14px}
 .stats b{font-weight:600;font-variant-numeric:tabular-nums}
 .stats span{color:var(--muted)}
@@ -83,6 +85,7 @@ tr:hover td{background:color-mix(in srgb,var(--cur) 12%,transparent)}
 
 <div class="wrap">
   <header>
+    <a class="home" href="../mc/">← LizzoLevi MC</a>
     <h1>Ellipsen-Kuppel 3D</h1>
     <p class="lead">Deine 80 × 50 Ellipse mit deiner Blockpalette: helle Wände mit türkisen Säulen, darüber eine Glaskuppel mit Prismarin-Rippen. Dreh die Ansicht und geh Ebene für Ebene durch.</p>
   </header>

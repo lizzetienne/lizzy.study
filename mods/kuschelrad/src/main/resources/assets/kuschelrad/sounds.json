@@ -1,0 +1,5 @@
+{
+	"kiss": {"sounds": ["kuschelrad:kiss"], "subtitle": "kuschelrad.subtitle.kiss"},
+	"pat": {"sounds": ["kuschelrad:pat1", "kuschelrad:pat2"], "subtitle": "kuschelrad.subtitle.pat"},
+	"hug": {"sounds": ["kuschelrad:hug"], "subtitle": "kuschelrad.subtitle.hug"}
+}

@@ -1,0 +1,36 @@
+{
+	"schemaVersion": 1,
+	"id": "kuschelrad",
+	"version": "${version}",
+	"name": "Kuschelrad",
+	"description": "Halte E gedrückt, während du einen Spieler anschaust: Küssen, Umarmen oder Kopf tätscheln – mit Animationen, Herzchen und Zustimmungsanfrage. Funktioniert auf jedem Server (über Relay) und optional serverseitig.",
+	"authors": [
+		"lizzetienne"
+	],
+	"contact": {
+		"homepage": "https://lizzy.study/mc/"
+	},
+	"license": "MIT",
+	"icon": "assets/kuschelrad/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"de.lizzy.kuschelrad.Kuschelrad"
+		],
+		"client": [
+			"de.lizzy.kuschelrad.client.KuschelradClient"
+		]
+	},
+	"mixins": [
+		{
+			"config": "kuschelrad.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.19.0",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

@@ -1,0 +1,426 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Enderman-XP-Farm 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout wie bei der Kuppel: Kopf + Kennzahlen, 3D-Ansicht neben Einstellungen, Bauschritte, Materialliste, dann Ebenenplan + Ebenenliste */
+:root{
+  --bg:#efedf3; --panel:#f9f8fb; --line:#dcd7e4; --line-5:#bdb4cb; --line-10:#8a7f9b;
+  --fg:#1e1828; --muted:#5f5670;
+  --cur:#e0b21c; --ghost:#e3dfea; --scene:#d9d2e6; --accent:#8a3fc0;
+  --f-display:"Pixelify Sans", "Courier New", monospace;
+  --f-body:"IBM Plex Sans", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#110d17; --panel:#191322; --line:#2a2236; --line-5:#3d3250; --line-10:#5d4f74;
+  --fg:#ece6f4; --muted:#a296b4; --cur:#f1c40f; --ghost:#241c30; --scene:#120a1c; --accent:#c07cf0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#110d17; --panel:#191322; --line:#2a2236; --line-5:#3d3250; --line-10:#5d4f74;
+  --fg:#ece6f4; --muted:#a296b4; --cur:#f1c40f; --ghost:#241c30; --scene:#120a1c; --accent:#c07cf0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;letter-spacing:.02em;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:500;font-size:22px;margin:0}
+.lead{margin:4px 0 0;color:var(--muted);max-width:65ch}
+.lead a{color:var(--accent)}
+.home{display:inline-block;margin-bottom:10px;font-family:var(--f-display);font-size:16px;color:var(--accent);text-decoration:none}
+.home:hover{text-decoration:underline}
+.stats{display:flex;flex-wrap:wrap;gap:8px 24px;font-family:var(--f-mono);font-size:14px}
+.stats b{font-weight:600;font-variant-numeric:tabular-nums}
+.stats span{color:var(--muted)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}
+@media (max-width:860px){.main{grid-template-columns:1fr}}
+.view{position:relative;background:var(--scene);border:1px solid var(--line);border-radius:8px;overflow:hidden;min-width:0;aspect-ratio:4/3;max-width:100%}
+.view canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:#b9a9cf;pointer-events:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:14px}
+.ctl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.ctl label output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.ctl input[type=range]{width:100%;accent-color:var(--accent)}
+.ctl small{color:var(--muted);font-size:12px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{accent-color:var(--accent)}
+.steps{margin:0;padding-left:22px;display:grid;gap:6px;font-size:14px;max-width:80ch}
+.steps li::marker{font-family:var(--f-mono);color:var(--accent);font-weight:600}
+.steps b{font-weight:600}
+.steps button{font:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.mats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.mat{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:6px 10px 6px 6px}
+.mat img{width:32px;height:32px;image-rendering:pixelated;border-radius:3px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);background:var(--ghost)}
+.mat div{min-width:0}
+.mat b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mat span{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+.layernav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{font:600 13px var(--f-body);background:var(--panel);color:var(--fg);border:1px solid var(--line-10);border-radius:6px;padding:6px 12px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--cur);outline-offset:2px}
+.lname{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.board{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.board canvas{display:block}
+.info{font-family:var(--f-mono);font-size:13px;color:var(--muted);min-height:1.5em}
+.info b{color:var(--fg)}
+.lmats{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.lmats span{display:flex;align-items:center;gap:6px}
+.lmats img{width:18px;height:18px;image-rendering:pixelated;border-radius:2px;background:var(--ghost)}
+.tbl{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:5px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{position:sticky;top:0;background:var(--panel);font-family:var(--f-body);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);z-index:1}
+td img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px;margin-right:2px;border-radius:2px;background:var(--ghost)}
+tr{cursor:pointer}
+tr.sel td{background:color-mix(in srgb,var(--cur) 25%,transparent)}
+tr:hover td{background:color-mix(in srgb,var(--cur) 12%,transparent)}
+.note{font-size:13px;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <a class="home" href="../mc/">← LizzoLevi MC</a>
+    <h1>Enderman-XP-Farm 3D</h1>
+    <p class="lead">Nachgebaut nach dem <a href="https://youtu.be/1IM9zCwQUek" target="_blank" rel="noopener">Tutorial von ReytGood</a>: eine Steinplattform im Void des Ends, eine Endermite als Köder in der Mitte, ein Fallschacht aus Laub und unten die Schlagkammer mit Trichtern und Kisten. Dreh die Ansicht und geh Ebene für Ebene durch.</p>
+  </header>
+
+  <div class="stats">
+    <div><span>Plattform</span> <b id="sP">–</b></div>
+    <div><span>Höhe</span> <b id="sH">–</b></div>
+    <div><span>Fallhöhe</span> <b id="sF">–</b></div>
+    <div><span>Blöcke gesamt</span> <b id="sT">–</b></div>
+  </div>
+
+  <div class="main">
+    <div class="view" id="view"><span class="hint">Ziehen = drehen · Scrollen/zwei Finger = zoomen</span></div>
+    <div class="card">
+      <div class="ctl">
+        <label for="rings">Laub-Ringe im Schacht <output id="ringso">12</output></label>
+        <input type="range" id="rings" min="4" max="20" value="12">
+        <small>12 wie im Video. Mehr Ringe = tieferer Fall</small>
+      </div>
+      <div class="ctl">
+        <label for="rad">Plattformgröße <output id="rado">21 × 21</output></label>
+        <input type="range" id="rad" min="5" max="14" value="10">
+        <small>Größer = mehr Spawnfläche für Endermen</small>
+      </div>
+      <div class="ctl">
+        <label for="layer">Bis Ebene zeigen <output id="layero">–</output></label>
+        <input type="range" id="layer" min="1" max="40" value="40">
+      </div>
+      <label class="check" for="cut"><input type="checkbox" id="cut"> Aufschneiden (eine Hälfte weg)</label>
+      <label class="check" for="mobs"><input type="checkbox" id="mobs" checked> Endermen laufen lassen</label>
+      <label class="check" for="bridge"><input type="checkbox" id="bridge" checked> Laubbrücke andeuten</label>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>So wird gebaut</h2>
+    <ol class="steps">
+      <li><b>Ab ins Void:</b> Am Rand der Hauptinsel Lava runterfließen lassen und mit Wasser zu Bruchstein machen. Unten einen Laubblock setzen, mit Leitern hoch und wieder runter.</li>
+      <li><b>Brücke:</b> Mit etwa 2 Stacks Laub weit raus ins Void bauen und dort eine 5 × 5 Laubplattform legen.</li>
+      <li><b>Sammler</b> (<button data-go="k">Ebene 2</button>): 3 Doppelkisten und davor 9 Trichter, die in die Kisten zeigen. Teppich auf die Trichter, rundherum Laub.</li>
+      <li><b>Schlagkammer</b> (<button data-go="s">Ebene 5</button>): 3 Glatte-Stein-Stufen oben vor die Kammer. Du stehst auf den Kisten und triffst die Endermen an den Beinen.</li>
+      <li><b>Schacht</b> (<button data-go="r">ab Ebene 7</button>): Mit Dreck 2 hoch bauen, einen 5 × 5 Laubring legen, und das 12-mal. Zwischen den Ringen bleibt immer eine Lücke.</li>
+      <li><b>Plattform</b> (<button data-go="p">oben</button>): 5 × 5 Steinring über dem Schacht, nach außen 8 Blöcke ausbauen und alles mit Stein füllen. In das 3 × 3 Loch kommen 8 Falltüren. <b>Alle öffnen!</b></li>
+      <li><b>Endermite-Kammer:</b> In die Mitte Dreck, 3 hoch, darauf ein Eisengitter. Über dem Gitter ein 2 × 1 Dreckboden mit 2 hoher Wand, Schiene drauf, Lore rein.</li>
+      <li><b>Köder:</b> Enderperlen auf den Dreckblock werfen, bis eine Endermite spawnt. Sie muss in der Lore auf dem Block über dem Gitter sitzen. Namensschild dran, damit sie nicht verschwindet. Danach den Bauturm abbauen.</li>
+    </ol>
+    <p class="note">Rüstung lohnt sich, aber ohne Dornen. Die Endermen laufen zur Endermite, treten auf die offenen Falltüren und fallen in den Schacht.</p>
+  </section>
+
+  <section class="card">
+    <h2>Materialliste</h2>
+    <div class="mats" id="mats"></div>
+    <p class="note">Stacks zu je 64 Blöcken. Ohne Brücke, Bruchsteinsäule und den Dreck, den du nur zum Hochbauen brauchst. Für die Brücke kommen noch etwa 2 Stacks Laub dazu. Dazu: Wasser- und Lavaeimer, Leitern oder Gerüst, Namensschild, Enderperlen.</p>
+  </section>
+
+  <div class="cols">
+    <section class="card">
+      <h2>Bauplan der Ebene</h2>
+      <div class="layernav">
+        <button class="btn" id="prev" aria-label="Ebene darunter">▼</button>
+        <span class="lname" id="lname">–</span>
+        <button class="btn" id="next" aria-label="Ebene darüber">▲</button>
+        <label class="check" for="nums" style="margin-left:auto"><input type="checkbox" id="nums" checked> Zahlen</label>
+      </div>
+      <div class="lmats" id="lmats"></div>
+      <div class="info" id="info">Zeig auf ein Feld für Koordinate und Block.</div>
+      <div class="board"><canvas id="plan"></canvas></div>
+      <p class="note">Dunkle Felder = Ebene darunter, als Orientierung. Zahl = so viele gleiche Blöcke waagrecht am Stück. Der Pfeil zeigt zur Spielerseite (Kisten).</p>
+    </section>
+    <section class="card">
+      <h2>Alle Ebenen</h2>
+      <div class="tbl"><table>
+        <thead><tr><th>Ebene</th><th>Blöcke</th><th>Material</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table></div>
+      <p class="note">Tippe eine Zeile an, um zu dieser Ebene zu springen. Leere Ebenen sind die Lücken zwischen den Ringen.</p>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const hash=(a,b,c)=>{let h=a*374761393+b*668265263+c*2147483647;h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)%1000/1000};
+
+// ---------- Texturen (16 × 16, gezeichnet) ----------
+function tex(fn){const c=document.createElement('canvas');c.width=c.height=16;const g=c.getContext('2d');fn(g,(x,y,col)=>{g.fillStyle=col;g.fillRect(x,y,1,1)});return c.toDataURL()}
+const noise=(base,amp,seed)=>(g,px)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const v=hash(x,y,seed)-.5;px(x,y,`rgb(${base[0]+v*amp|0},${base[1]+v*amp|0},${base[2]+v*amp|0})`)}};
+const T={
+  stone:tex(noise([125,125,125],38,1)),
+  slab:tex((g,px)=>{noise([168,168,168],18,2)(g,px);g.fillStyle='#8c8c8c';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);g.fillStyle='#9b9b9b';g.fillRect(1,7,14,1)}),
+  leaves:tex((g,px)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const v=hash(x,y,3);px(x,y,v<.18?'#1d3a12':`rgb(${40+v*40|0},${92+v*50|0},${28+v*25|0})`)}}),
+  chest:tex((g,px)=>{noise([152,98,40],30,4)(g,px);g.fillStyle='#4a2e12';g.fillRect(0,0,16,1);g.fillRect(0,15,16,1);g.fillRect(0,0,1,16);g.fillRect(15,0,1,16);g.fillRect(0,5,16,1);g.fillStyle='#c9c9c9';g.fillRect(7,4,2,4)}),
+  hopper:tex((g,px)=>{noise([70,70,74],20,5)(g,px);g.fillStyle='#2b2b2f';g.fillRect(2,2,12,12);g.fillStyle='#45454b';g.fillRect(5,5,6,6)}),
+  carpet:tex(noise([232,234,236],16,6)),
+  trapdoor:tex((g,px)=>{noise([140,104,58],26,7)(g,px);g.fillStyle='#5b4122';g.fillRect(0,0,16,2);g.fillRect(0,14,16,2);g.fillRect(0,0,2,16);g.fillRect(14,0,2,16);g.fillRect(7,0,2,16);g.fillStyle='rgba(0,0,0,0)';g.clearRect(3,3,3,3);g.clearRect(10,3,3,3);g.clearRect(3,10,3,3);g.clearRect(10,10,3,3)}),
+  dirt:tex((g,px)=>{for(let y=0;y<16;y++)for(let x=0;x<16;x++){const v=hash(x,y,8);px(x,y,v<.12?'#5b3d26':v>.9?'#8a6a50':`rgb(${118+v*20|0},${84+v*15|0},${58+v*10|0})`)}}),
+  bars:tex(g=>{g.fillStyle='#6d6f73';for(const x of [0,5,10,15])g.fillRect(x,0,1,16);g.fillStyle='#a9abaf';for(const x of [1,6,11])g.fillRect(x,0,1,16);g.fillStyle='#6d6f73';g.fillRect(0,3,16,1);g.fillRect(0,12,16,1)}),
+  rail:tex(g=>{g.fillStyle='#6b4f2e';for(let y=1;y<16;y+=4)g.fillRect(1,y,14,2);g.fillStyle='#9a9a9a';g.fillRect(3,0,1,16);g.fillRect(12,0,1,16);g.fillStyle='#d0d0d0';g.fillRect(2,0,1,16);g.fillRect(13,0,1,16)}),
+  ladder:tex(g=>{g.fillStyle='#7a5a32';g.fillRect(2,0,2,16);g.fillRect(12,0,2,16);g.fillStyle='#9c7646';for(let y=1;y<16;y+=4)g.fillRect(2,y,12,2)}),
+  cart:tex((g,px)=>{noise([118,120,126],24,9)(g,px);g.fillStyle='#4d4f55';g.fillRect(0,0,16,2);g.fillRect(0,14,16,2)}),
+};
+// Blöcke: shape = Form in 3D. stack = Stapelgröße.
+const BLOCKS=[
+  {name:'Stein',tex:T.stone,shape:'full'},
+  {name:'Glatte Steinstufe (oben)',tex:T.slab,shape:'slabTop'},
+  {name:'Eichenlaub',tex:T.leaves,shape:'full'},
+  {name:'Kiste',tex:T.chest,shape:'chest'},
+  {name:'Trichter',tex:T.hopper,shape:'full'},
+  {name:'Weißer Teppich',tex:T.carpet,shape:'carpet'},
+  {name:'Falltür (offen)',tex:T.trapdoor,shape:'plate',alpha:true},
+  {name:'Erde',tex:T.dirt,shape:'full'},
+  {name:'Eisengitter',tex:T.bars,shape:'bars',alpha:true},
+  {name:'Schiene',tex:T.rail,shape:'rail',alpha:true},
+  {name:'Leiter',tex:T.ladder,shape:'plate',alpha:true},
+  {name:'Lore',tex:T.cart,shape:'cart',nonBlock:true},
+];
+const B={stone:0,slab:1,leaves:2,chest:3,hopper:4,carpet:5,trap:6,dirt:7,bars:8,rail:9,ladder:10,cart:11};
+BLOCKS.forEach(b=>{b.img=new Image();b.img.src=b.tex});
+
+// ---------- Aufbau ----------
+// Raster: Spalte c (x), Reihe r (z). Schachtmitte = (R,R). Spielerseite (Kisten) = größere Reihen.
+let R=10,rings=12,cur=0,layers=[],N=21,platY=0;
+function build(){
+  N=2*R+1;const m=R;layers=[];
+  const L=()=>{const o={cells:[],kind:''};layers.push(o);return o};
+  const put=(o,r,c,b,dir)=>o.cells.push([r,c,b,dir]);
+  const ring=(o,b,skip)=>{for(let r=m-2;r<=m+2;r++)for(let c=m-2;c<=m+2;c++){if(Math.max(Math.abs(r-m),Math.abs(c-m))!==2)continue;if(skip&&skip(r,c))continue;put(o,r,c,b)}};
+  const frontMid=(r,c)=>r===m+2&&Math.abs(c-m)<=1;
+  // 1: Laubplattform 5 × 5 unter Trichtern und Kisten
+  let o=L();o.kind='Laubboden';for(let r=m-1;r<=m+3;r++)for(let c=m-2;c<=m+2;c++)put(o,r,c,B.leaves);
+  // 2: Trichter 3 × 3, Kisten 3 × 2 davor, Laub rundherum
+  o=L();o.kind='Sammler';
+  for(let r=m-1;r<=m+1;r++)for(let c=m-1;c<=m+1;c++)put(o,r,c,B.hopper);
+  for(let r=m+2;r<=m+3;r++)for(let c=m-1;c<=m+1;c++)put(o,r,c,B.chest);
+  ring(o,B.leaves,frontMid);
+  // 3: Teppich auf den Trichtern
+  o=L();o.kind='Schlagkammer';for(let r=m-1;r<=m+1;r++)for(let c=m-1;c<=m+1;c++)put(o,r,c,B.carpet);ring(o,B.leaves,frontMid);
+  // 4: Laub, vorne offen (hier stehst du auf den Kisten)
+  o=L();o.kind='Schlagkammer';ring(o,B.leaves,frontMid);
+  // 5: Laubring, vorne 3 Stufen (obere Hälfte) – Lücke 2,5 Blöcke, Endermen passen nicht durch
+  o=L();o.kind='Stufen';ring(o,B.leaves,frontMid);for(let c=m-1;c<=m+1;c++)put(o,m+2,c,B.slab);
+  // Schacht: Lücke, Ring, Lücke, Ring …
+  for(let k=0;k<rings;k++){o=L();o.kind='Lücke';o=L();o.kind='Ring '+(k+1);ring(o,B.leaves)}
+  L().kind='Lücke';
+  // Plattform: Stein (2R+1)², 3 × 3 Loch, mittig Erde, 8 offene Falltüren
+  o=L();o.kind='Plattform';platY=layers.length-1;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const dr=r-m,dc=c-m;
+    if(Math.max(Math.abs(dr),Math.abs(dc))>1){put(o,r,c,B.stone);continue}
+    if(!dr&&!dc){put(o,r,c,B.dirt);continue}
+    put(o,r,c,B.trap,dr===-1?'n':dr===1?'s':dc===-1?'w':'e');
+  }
+  for(let i=0;i<3;i++){o=L();o.kind='Erdsäule';put(o,m,m,B.dirt)}
+  o=L();o.kind='Gitter';put(o,m,m,B.bars);
+  o=L();o.kind='Endermite-Boden';put(o,m,m,B.dirt);put(o,m+1,m,B.dirt);
+  const wall=o=>{for(let r=m-1;r<=m+2;r++)for(let c=m-1;c<=m+1;c++){if(c===m&&(r===m||r===m+1))continue;put(o,r,c,B.dirt)}};
+  o=L();o.kind='Endermite-Kammer';wall(o);put(o,m,m,B.rail);put(o,m,m,B.cart);put(o,m+1,m,B.ladder,'s');
+  o=L();o.kind='Endermite-Kammer';wall(o);put(o,m+1,m,B.ladder,'s');
+  layers.forEach(L=>{L.map=new Map();L.cells.forEach(([r,c,b])=>{if(!BLOCKS[b].nonBlock)L.map.set(r+','+c,b)});
+    L.count={};L.cells.forEach(([,,b])=>L.count[b]=(L.count[b]||0)+1)});
+}
+
+// ---------- 3D ----------
+const view=$('view');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+view.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(40,4/3,0.5,1000);
+camera.position.set(38,46,52);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.target.set(0,16,0);
+scene.add(new THREE.HemisphereLight(0xf2e8ff,0x5a4a70,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.5);sun.position.set(40,90,60);scene.add(sun);
+// Sterne im Void
+{const g=new THREE.BufferGeometry(),p=[];for(let i=0;i<500;i++){const u=Math.random()*2-1,t=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u);p.push(s*Math.cos(t)*300,u*300,s*Math.sin(t)*300)}
+  g.setAttribute('position',new THREE.Float32BufferAttribute(p,3));scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xd8c8ff,size:1.2,sizeAttenuation:false})))}
+const loader=new THREE.TextureLoader();
+BLOCKS.forEach(b=>{const t=loader.load(b.tex);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
+  b.mat=new THREE.MeshLambertMaterial({map:t,transparent:!!b.alpha,alphaTest:b.alpha?.5:0,side:b.alpha?THREE.DoubleSide:THREE.FrontSide})});
+const GEO={
+  full:new THREE.BoxGeometry(1,1,1),
+  slabTop:new THREE.BoxGeometry(1,.5,1).translate(0,.25,0),
+  chest:new THREE.BoxGeometry(.875,.875,.875).translate(0,-.0625,0),
+  carpet:new THREE.BoxGeometry(1,.0625,1).translate(0,-.47,0),
+  rail:new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2).translate(0,-.48,0),
+  bars:(()=>{const a=new THREE.PlaneGeometry(1,1),b=new THREE.PlaneGeometry(1,1).rotateY(Math.PI/2);const g=new THREE.BufferGeometry();
+    const pa=[...a.attributes.position.array,...b.attributes.position.array],ua=[...a.attributes.uv.array,...b.attributes.uv.array],na=[...a.attributes.normal.array,...b.attributes.normal.array];
+    const ia=[...a.index.array,...Array.from(b.index.array,i=>i+4)];g.setAttribute('position',new THREE.Float32BufferAttribute(pa,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(ua,2));g.setAttribute('normal',new THREE.Float32BufferAttribute(na,3));g.setIndex(ia);return g})(),
+  plate:new THREE.BoxGeometry(1,1,.1875),
+  cart:new THREE.BoxGeometry(.85,.55,.95).translate(0,-.15,0),
+};
+const ROT={n:0,s:Math.PI,w:Math.PI/2,e:-Math.PI/2};
+let meshes=[];
+const endermite=new THREE.Mesh(new THREE.BoxGeometry(.4,.3,.5),new THREE.MeshLambertMaterial({color:0x4a2a66,emissive:0x2a0a40}));
+scene.add(endermite);
+
+function rebuild3D(){
+  meshes.forEach(m=>{scene.remove(m);m.dispose&&m.dispose()});meshes=[];
+  const cut=$('cut').checked,byBlock={},m=R;
+  for(let i=0;i<=cur;i++)for(const [r,c,b,dir] of layers[i].cells){if(cut&&c>m)continue;(byBlock[b]=byBlock[b]||[]).push([r,c,i,dir])}
+  if($('bridge').checked&&cur>=0)(byBlock[B.leaves]=byBlock[B.leaves]||[]).push(...Array.from({length:18},(_,k)=>[m-2-k,m,0,null,true]));
+  const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),s=new THREE.Vector3(1,1,1),p=new THREE.Vector3(),hi=new THREE.Color(1,.85,.35),wh=new THREE.Color(1,1,1),dim=new THREE.Color(.7,.7,.7),up=new THREE.Vector3(0,1,0);
+  for(const id in byBlock){
+    const list=byBlock[id],B_=BLOCKS[id];
+    const mesh=new THREE.InstancedMesh(GEO[B_.shape],B_.mat,list.length);
+    list.forEach(([r,c,i,dir,ghost],k)=>{
+      q.setFromAxisAngle(up,dir?ROT[dir]:0);p.set(c-m,i+.5,r-m);
+      // offene Falltür / Leiter: senkrecht an der Außenkante des Feldes
+      if(B_.shape==='plate'){const d=dir||'n';p.x+=d==='w'?-.406:d==='e'?.406:0;p.z+=d==='n'?-.406:d==='s'?.406:0}
+      m4.compose(p,q,s);mesh.setMatrixAt(k,m4);mesh.setColorAt(k,ghost?dim:i===cur&&cur<layers.length-1?hi:wh)});
+    mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
+    scene.add(mesh);meshes.push(mesh);
+  }
+  const top=layers.length-2;endermite.visible=cur>=top-0;endermite.position.set(0,top+.35,0);
+}
+function resize(){const w=view.clientWidth,h=view.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(view);
+function themeScene(){scene.background=new THREE.Color(css('--scene'))}
+
+// ---------- Endermen ----------
+const emat=new THREE.MeshLambertMaterial({color:0x111114}),eyeM=new THREE.MeshBasicMaterial({color:0xd27bff});
+function makeEnderman(){
+  const g=new THREE.Group();
+  const add=(w,h,d,x,y,z,mat=emat)=>{const b=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);b.position.set(x,y,z);g.add(b);return b};
+  add(.5,.75,.25,0,1.85,0);add(.5,.5,.5,0,2.48,0);
+  add(.32,.06,.02,0,2.5,.26,eyeM);
+  g.legs=[add(.12,1.5,.12,-.13,.75,0),add(.12,1.5,.12,.13,.75,0)];
+  add(.12,1.5,.12,-.32,1.5,0);add(.12,1.5,.12,.32,1.5,0);
+  scene.add(g);return g;
+}
+const mobs=[];
+function spawn(e){const a=Math.random()*Math.PI*2,d=3+Math.random()*(R-3.5);e.position.set(Math.cos(a)*d,platY+1,Math.sin(a)*d);e.state='walk';e.vy=0;e.t=0;e.visible=true}
+for(let i=0;i<7;i++){const e=makeEnderman();spawn(e);e.t=-Math.random()*4;mobs.push(e)}
+let last=performance.now();
+function stepMobs(dt){
+  const on=$('mobs').checked&&cur===layers.length-1&&!$('cut').checked;
+  mobs.forEach(e=>{
+    e.visible=on&&e.t>=0;if(!on)return;
+    e.t+=dt;if(e.t<0)return;
+    if(e.state==='walk'){
+      const v=new THREE.Vector3(-e.position.x,0,-e.position.z),d=v.length();
+      e.rotation.y=Math.atan2(v.x,v.z);
+      const sw=Math.sin(e.t*7)*.5;e.legs[0].rotation.x=sw;e.legs[1].rotation.x=-sw;
+      if(Math.max(Math.abs(e.position.x),Math.abs(e.position.z))<1.45){e.state='fall';e.position.x=Math.sign(e.position.x)*Math.min(Math.abs(e.position.x),1)||.9;e.position.z=Math.sign(e.position.z)*Math.min(Math.abs(e.position.z),1)}
+      else e.position.addScaledVector(v.normalize(),Math.min(d,dt*2.2));
+    }else if(e.state==='fall'){
+      e.vy=Math.min(e.vy+dt*30,40);e.position.y-=e.vy*dt;
+      if(e.position.y<=2.06){e.position.y=2.06;e.state='hit';e.t=0}
+    }else if(e.state==='hit'){
+      e.legs.forEach(l=>l.rotation.x=0);
+      if(e.t>1.6){spawn(e);e.t=-1-Math.random()*3}
+    }
+  });
+}
+(function loop(t){const dt=Math.min(.05,(t-last)/1000||0);last=t;stepMobs(dt);controls.update();renderer.render(scene,camera);requestAnimationFrame(loop)})(performance.now());
+
+// ---------- Ebenenplan ----------
+const plan=$('plan'),pc=plan.getContext('2d');const PAD=26;let cell=20,hover=null;
+function drawPlan(){
+  cell=Math.max(12,Math.min(28,Math.floor((plan.parentElement.clientWidth-PAD-6)/N)));
+  const dpr=window.devicePixelRatio||1,pw=PAD+N*cell+4,ph=PAD+N*cell+22;
+  plan.width=pw*dpr;plan.height=ph*dpr;plan.style.width=pw+'px';plan.style.height=ph+'px';
+  pc.setTransform(dpr,0,0,dpr,0,0);pc.imageSmoothingEnabled=false;pc.fillStyle=css('--panel');pc.fillRect(0,0,pw,ph);
+  const L=layers[cur];let below=null;for(let i=cur-1;i>=0;i--)if(layers[i].cells.length){below=layers[i];break}
+  if(below){pc.fillStyle=css('--ghost');for(const [r,c] of below.cells)pc.fillRect(PAD+c*cell,PAD+r*cell,cell,cell)}
+  for(const [r,c,b,dir] of L.cells){const im=BLOCKS[b].img,x=PAD+c*cell,y=PAD+r*cell;if(!im.complete)continue;
+    if(BLOCKS[b].nonBlock){pc.drawImage(im,x+cell*.2,y+cell*.2,cell*.6,cell*.6);continue}
+    if(BLOCKS[b].shape==='plate'){const t=Math.max(3,cell*.22);pc.drawImage(im,dir==='e'?x+cell-t:x,dir==='s'?y+cell-t:y,dir==='e'||dir==='w'?t:cell,dir==='n'||dir==='s'?t:cell);continue}
+    pc.drawImage(im,x,y,cell,cell)}
+  const ln=(x1,y1,x2,y2,t,w)=>{pc.strokeStyle=css(t);pc.lineWidth=w;pc.beginPath();pc.moveTo(x1+.5,y1+.5);pc.lineTo(x2+.5,y2+.5);pc.stroke()};
+  pc.globalAlpha=.6;
+  for(let i=0;i<=N;i++){const t=i%5?'--line':'--line-5';ln(PAD+i*cell,PAD,PAD+i*cell,PAD+N*cell,t,1);ln(PAD,PAD+i*cell,PAD+N*cell,PAD+i*cell,t,1)}
+  pc.globalAlpha=1;
+  ln(PAD+(R+.5)*cell,PAD-4,PAD+(R+.5)*cell,PAD+N*cell+4,'--accent',1.5);ln(PAD-4,PAD+(R+.5)*cell,PAD+N*cell+4,PAD+(R+.5)*cell,'--accent',1.5);
+  pc.fillStyle=css('--muted');pc.font='600 10px "IBM Plex Mono", monospace';pc.textBaseline='middle';
+  pc.textAlign='center';for(let c=0;c<N;c++)if(c===0||(c+1)%5===0||c===R)pc.fillText(c+1,PAD+c*cell+cell/2,PAD/2);
+  pc.textAlign='right';for(let r=0;r<N;r++)if(r===0||(r+1)%5===0||r===R)pc.fillText(r+1,PAD-4,PAD+r*cell+cell/2);
+  pc.textAlign='center';pc.fillStyle=css('--accent');pc.font='600 11px "IBM Plex Sans", sans-serif';pc.fillText('▼ Spielerseite (Kisten)',PAD+N*cell/2,PAD+N*cell+12);
+  if($('nums').checked){
+    const fs=Math.max(8,Math.round(cell*.6));pc.font=`700 ${fs}px "IBM Plex Mono", monospace`;pc.textAlign='center';pc.lineWidth=Math.max(2.5,fs/3.5);pc.lineJoin='round';
+    for(let r=0;r<N;r++){let s=-1,sb=null;for(let c=0;c<=N;c++){const b=c<N?L.map.get(r+','+c):undefined;
+      if(s>=0&&b!==sb){const n=c-s;if(n>=2){const x=PAD+(s+n/2)*cell,y=PAD+r*cell+cell/2+1;pc.strokeStyle='rgba(0,0,0,.75)';pc.strokeText(n,x,y);pc.fillStyle='#fff';pc.fillText(n,x,y)}s=-1}
+      if(b!==undefined&&s<0){s=c;sb=b}}}
+  }
+  if(hover){pc.strokeStyle=css('--cur');pc.lineWidth=2;pc.strokeRect(PAD+hover.c*cell+1,PAD+hover.r*cell+1,cell-2,cell-2)}
+}
+plan.addEventListener('mousemove',e=>{const bb=plan.getBoundingClientRect();const c=Math.floor((e.clientX-bb.left-PAD)/cell),r=Math.floor((e.clientY-bb.top-PAD)/cell);
+  hover=(c>=0&&r>=0&&c<N&&r<N)?{r,c}:null;const names=hover?layers[cur].cells.filter(([rr,cc])=>rr===r&&cc===c).map(([,,b])=>BLOCKS[b].name):[];
+  $('info').innerHTML=hover?`Spalte <b>${c+1}</b> · Reihe <b>${r+1}</b>${names.length?` · <b>${names.join(' + ')}</b>`:''}`:'Zeig auf ein Feld für Koordinate und Block.';drawPlan()});
+plan.addEventListener('mouseleave',()=>{hover=null;drawPlan()});
+
+// ---------- Listen ----------
+const stacks=n=>{const s=Math.floor(n/64),rest=n%64;return s?`${s} Stack${s>1?'s':''}${rest?' + '+rest:''}`:`${rest}`};
+function buildMats(){
+  const tot={};layers.forEach(L=>{for(const b in L.count)tot[b]=(tot[b]||0)+L.count[b]});
+  const ids=Object.keys(tot).sort((a,b)=>tot[b]-tot[a]);
+  $('mats').innerHTML=ids.map(id=>{let n=tot[id],extra='';if(+id===B.chest){extra=` · ${n/2} Doppelkisten`}
+    return `<div class="mat"><img src="${BLOCKS[id].tex}" alt=""><div><b>${BLOCKS[id].name}</b><span>${n} · ${stacks(n)}${extra}</span></div></div>`}).join('')
+    +`<div class="mat"><img src="${BLOCKS[B.cart].tex}" alt=""><div><b>Endermite + Namensschild</b><span>per Enderperle spawnen</span></div></div>`;
+  const all=ids.filter(i=>!BLOCKS[i].nonBlock).reduce((a,i)=>a+tot[i],0);
+  $('sT').textContent=all;$('sH').textContent=layers.length+' Ebenen';$('sP').textContent=`${N} × ${N}`;$('sF').textContent=(platY-2)+' Blöcke';
+}
+function buildTable(){
+  const tb=$('tbody');tb.innerHTML='';
+  layers.forEach((L,i)=>{const tr=document.createElement('tr');tr.id='L'+i;
+    const sw=Object.keys(L.count).sort((a,b)=>L.count[b]-L.count[a]).map(b=>`<img src="${BLOCKS[b].tex}" alt="${BLOCKS[b].name}" title="${BLOCKS[b].name}: ${L.count[b]}">`).join('');
+    tr.innerHTML=`<td>${i+1} ${L.kind}</td><td>${L.cells.filter(([,,b])=>!BLOCKS[b].nonBlock).length||'–'}</td><td>${sw}</td>`;
+    tr.onclick=()=>setLayer(i);tb.appendChild(tr)});
+}
+function setLayer(i,scroll){
+  cur=Math.max(0,Math.min(layers.length-1,i));
+  $('layer').value=cur+1;$('layero').textContent=`${cur+1} / ${layers.length}`;
+  const L=layers[cur],n=L.cells.filter(([,,b])=>!BLOCKS[b].nonBlock).length;
+  $('lname').textContent=`Ebene ${cur+1} · ${L.kind} · ${n} Blöcke`;
+  $('lmats').innerHTML=Object.keys(L.count).sort((a,b)=>L.count[b]-L.count[a]).map(b=>`<span><img src="${BLOCKS[b].tex}" alt="">${BLOCKS[b].name} <b>${L.count[b]}</b></span>`).join('')||'<span>Lücke: hier nichts setzen, nur 2 hoch weiterbauen</span>';
+  document.querySelectorAll('tr.sel').forEach(t=>t.classList.remove('sel'));
+  const row=$('L'+cur);if(row){row.classList.add('sel');if(scroll)row.scrollIntoView({block:'nearest'})}
+  rebuild3D();drawPlan();
+}
+function all(keep){
+  build();buildMats();
+  $('layer').max=layers.length;buildTable();
+  controls.target.set(0,layers.length*0.42,0);
+  setLayer(keep?Math.min(cur,layers.length-1):layers.length-1);
+}
+$('rings').oninput=e=>{rings=+e.target.value;$('ringso').textContent=rings;all()};
+$('rad').oninput=e=>{R=+e.target.value;$('rado').textContent=`${2*R+1} × ${2*R+1}`;all(true)};
+$('layer').oninput=e=>setLayer(+e.target.value-1,true);
+$('prev').onclick=()=>setLayer(cur-1,true);$('next').onclick=()=>setLayer(cur+1,true);
+$('cut').onchange=rebuild3D;$('bridge').onchange=rebuild3D;$('nums').onchange=drawPlan;
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const k=b.dataset.go;setLayer(k==='k'?1:k==='s'?4:k==='r'?6:platY,true);$('view').scrollIntoView({behavior:'smooth',block:'center'})});
+new ResizeObserver(drawPlan).observe(plan.parentElement);
+const retheme=()=>{themeScene();drawPlan()};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',retheme);
+new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+BLOCKS.forEach(b=>b.img.onload=()=>drawPlan());
+themeScene();resize();all();
+</script>
+</body></html>

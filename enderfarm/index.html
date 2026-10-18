@@ -401,7 +401,7 @@ function setLayer(i,scroll){
   $('lname').textContent=`Ebene ${cur+1} · ${L.kind} · ${n} Blöcke`;
   $('lmats').innerHTML=Object.keys(L.count).sort((a,b)=>L.count[b]-L.count[a]).map(b=>`<span><img src="${BLOCKS[b].tex}" alt="">${BLOCKS[b].name} <b>${L.count[b]}</b></span>`).join('')||'<span>Lücke: hier nichts setzen, nur 2 hoch weiterbauen</span>';
   document.querySelectorAll('tr.sel').forEach(t=>t.classList.remove('sel'));
-  const row=$('L'+cur);if(row){row.classList.add('sel');if(scroll)row.scrollIntoView({block:'nearest'})}
+  const row=$('L'+cur);if(row){row.classList.add('sel');if(scroll){/* nur die Tabelle scrollen, nicht die Seite */const box=row.closest('.tbl'),top=row.offsetTop-box.querySelector('thead').offsetHeight;if(top<box.scrollTop)box.scrollTop=top;else if(row.offsetTop+row.offsetHeight>box.scrollTop+box.clientHeight)box.scrollTop=row.offsetTop+row.offsetHeight-box.clientHeight}}
   rebuild3D();drawPlan();
 }
 function all(keep){

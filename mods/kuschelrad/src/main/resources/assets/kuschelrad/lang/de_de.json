@@ -29,5 +29,6 @@
 	"kuschelrad.refused.cooldown": "Nicht so schnell!",
 	"kuschelrad.subtitle.kiss": "Schmatz",
 	"kuschelrad.subtitle.pat": "Tätschel",
-	"kuschelrad.subtitle.hug": "Umarmung"
+	"kuschelrad.subtitle.hug": "Umarmung",
+	"kuschelrad.msg.solo": "Nur für dich sichtbar (Solo-Modus)"
 }

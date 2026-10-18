@@ -11,7 +11,11 @@ Kurz auf E tippen öffnet ganz normal das Inventar.
 
 ## Wer sieht die Animation?
 
-Alle Spieler in der Nähe, **die Kuschelrad installiert haben**. Wer die Mod nicht hat, sieht nichts davon –
+**Solo-Modus (Standard, geht auf jedem Server):** Hat der Server die Mod nicht und ist kein Relay eingetragen,
+spielt die Animation sofort bei dir ab – ohne Anfrage, und **nur du** siehst sie. Abschalten mit `"soloMode": false`.
+
+Mit Anfrage und für andere sichtbar wird es, sobald Server-Mod oder Relay da sind: Dann sehen es alle
+Spieler in der Nähe, **die Kuschelrad installiert haben**. Wer die Mod nicht hat, sieht nichts davon –
 deshalb ist sie auf jedem Server unauffällig und schickt keine fremden Pakete an Vanilla-Server.
 
 Es gibt zwei Wege, wie die Anfragen ankommen:
@@ -25,6 +29,7 @@ Es gibt zwei Wege, wie die Anfragen ankommen:
 | Feld | Standard | Bedeutung |
 |---|---|---|
 | `relayUrl` | `""` | z. B. `wss://kuschel.example.net` – leer = nur Server-Mod |
+| `soloMode` | `true` | ohne Server-Mod/Relay die Animation nur bei dir abspielen |
 | `acceptRequests` | `true` | `false` lehnt alle Anfragen still ab |
 | `useInventoryKey` | `true` | E halten öffnet das Rad; sonst nur die eigene Taste (Steuerung → Kuschelrad) |
 | `holdMillis` | `250` | so lange muss E gehalten werden |

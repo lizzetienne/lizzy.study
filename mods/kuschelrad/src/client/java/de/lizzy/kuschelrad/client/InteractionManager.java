@@ -52,6 +52,16 @@ public final class InteractionManager {
 			return;
 		}
 		Transport transport = transport();
+		if (transport == null && KuschelConfig.get().soloMode) {
+			if (mc.player.distanceTo(target) > Action.MAX_DISTANCE) {
+				overlay(Component.translatable("kuschelrad.refused.too_far", target.getName()).withStyle(ChatFormatting.RED));
+				return;
+			}
+			// Solo-Modus: niemand wird gefragt, nur dieser Client sieht die Animation.
+			AnimationManager.start(mc.player.getUUID(), target.getUUID(), action);
+			overlay(Component.translatable("kuschelrad.msg.solo").withStyle(ChatFormatting.GRAY));
+			return;
+		}
 		if (transport == null) {
 			String relay = KuschelConfig.get().relayUrl;
 			overlay(Component.translatable(relay == null || relay.isBlank() ? "kuschelrad.msg.no_transport" : "kuschelrad.msg.relay_offline")

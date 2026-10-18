@@ -29,5 +29,6 @@
 	"kuschelrad.refused.cooldown": "Not so fast!",
 	"kuschelrad.subtitle.kiss": "Smooch",
 	"kuschelrad.subtitle.pat": "Pat pat",
-	"kuschelrad.subtitle.hug": "Hug"
+	"kuschelrad.subtitle.hug": "Hug",
+	"kuschelrad.msg.solo": "Only visible to you (solo mode)"
 }

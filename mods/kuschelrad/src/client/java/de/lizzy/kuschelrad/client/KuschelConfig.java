@@ -21,6 +21,11 @@ public final class KuschelConfig {
 
 	/** WebSocket-Adresse des Relays (wss://…). Leer = nur über Server-Mod. */
 	public String relayUrl = "";
+	/**
+	 * Ohne Server-Mod und Relay die Animation einfach bei sich selbst abspielen
+	 * (nur man selbst sieht sie, es gibt keine Anfrage).
+	 */
+	public boolean soloMode = true;
 	/** Anfragen anderer Spieler überhaupt anzeigen. */
 	public boolean acceptRequests = true;
 	/** E gedrückt halten öffnet das Rad, wenn man einen Spieler anschaut. */

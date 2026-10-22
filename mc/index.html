@@ -7,39 +7,160 @@
 <meta name="theme-color" content="#0d1617">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
-/* Startseite: Titel, darunter ein Raster aus Gebäude-Karten (jede Karte = Button zur Gebäudeseite) */
+/* Aufbau: Kopfzeile mit Inventar-Tabs (wie im Kreativmodus), darunter je Tab ein Bereich.
+   Clean im Grundton, Minecraft-Akzente bei Tabs, Eingabefeldern, Knöpfen und Tooltips. */
 :root{
-  --bg:#ecf1f0; --panel:#f7faf9; --line:#d3dedc; --fg:#152826; --muted:#536b68; --accent:#13858c;
-  --grass:#5d9a3a; --dirt:#7a5639; --shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px rgba(21,40,38,.08);
-  --f-display:"Pixelify Sans","Courier New",monospace;
+  --bg:#ecf1f0; --panel:#f7faf9; --sunk:#e3eae9; --line:#d3dedc; --line-5:#b3c3c0; --line-10:#7f9794;
+  --fg:#152826; --muted:#536b68; --accent:#13858c;
+  --grass:#5d9a3a; --dirt:#7a5639; --nether:#a8382b; --ench:#8a4fe0; --gold:#e0a400; --xp:#5fbf1f;
+  --shadow:0 1px 0 rgba(0,0,0,.04),0 8px 24px rgba(21,40,38,.08);
+  --f-display:"Jersey 10","Courier New",monospace;
   --f-body:"IBM Plex Sans",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0d1617; --panel:#132022; --line:#203234; --fg:#dfeceb; --muted:#8fa9a6; --accent:#3cb6bd;
+  --bg:#0d1617; --panel:#132022; --sunk:#0f1a1c; --line:#203234; --line-5:#2f4648; --line-10:#4b6a6d;
+  --fg:#dfeceb; --muted:#8fa9a6; --accent:#3cb6bd; --nether:#d4513f; --ench:#b07cff; --gold:#f1c40f; --xp:#80ff20;
   --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 28px rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0d1617; --panel:#132022; --line:#203234; --fg:#dfeceb; --muted:#8fa9a6; --accent:#3cb6bd;
+  --bg:#0d1617; --panel:#132022; --sunk:#0f1a1c; --line:#203234; --line-5:#2f4648; --line-10:#4b6a6d;
+  --fg:#dfeceb; --muted:#8fa9a6; --accent:#3cb6bd; --nether:#d4513f; --ench:#b07cff; --gold:#f1c40f; --xp:#80ff20;
   --shadow:0 1px 0 rgba(0,0,0,.2),0 10px 28px rgba(0,0,0,.35); color-scheme:dark}
 *{box-sizing:border-box}
+html{font-synthesis-weight:none}
 html,body{margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;min-height:100vh}
-.wrap{max-width:1100px;margin:0 auto;padding-block:40px 64px;
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+canvas.px,img.px{image-rendering:pixelated;image-rendering:crisp-edges}
+h2{font-family:var(--f-display);font-size-adjust:.52;font-weight:700;font-size:clamp(26px,5vw,34px);line-height:1.1;margin:0;letter-spacing:.01em}
+h3{font-family:var(--f-display);font-size-adjust:.52;font-weight:500;font-size:20px;margin:0}
+.lead{margin:6px 0 0;color:var(--muted);max-width:62ch}
+.muted{color:var(--muted)}
+a{color:var(--accent)}
 
-/* Grasblock-Kante als Erkennungszeichen über dem Titel */
-.strip{height:12px;border-radius:3px;margin-bottom:28px;
-  background:linear-gradient(var(--grass) 0 5px,var(--dirt) 5px);
-  -webkit-mask:repeating-linear-gradient(90deg,#000 0 12px,rgba(0,0,0,.82) 12px 24px);
-          mask:repeating-linear-gradient(90deg,#000 0 12px,rgba(0,0,0,.82) 12px 24px)}
-h1{font-family:var(--f-display);font-weight:700;font-size:clamp(40px,9vw,72px);line-height:1;margin:0;letter-spacing:.02em}
-h1 span{color:var(--accent)}
-.lead{margin:12px 0 0;color:var(--muted);max-width:55ch;font-size:16px}
-h2{font-family:var(--f-display);font-weight:500;font-size:24px;margin:44px 0 16px}
+/* ---------- Kopf + Tabs ---------- */
+.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding-top:env(safe-area-inset-top,0px)}
+.topin{display:flex;align-items:flex-end;gap:16px;padding-top:12px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-size-adjust:.52;font-weight:700;font-size:20px;
+  color:var(--fg);text-decoration:none;padding-bottom:10px;white-space:nowrap}
+.brand span{color:var(--accent)}
+.brand img{width:24px;height:24px}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;padding-top:4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;flex:none;
+  padding:8px 14px 9px;border:1px solid transparent;border-bottom:0;border-radius:8px 8px 0 0;
+  font-family:var(--f-display);font-size-adjust:.52;font-size:16px;color:var(--muted);position:relative;top:1px;
+  transition:color .15s,background .15s,transform .15s}
+.tab img{width:22px;height:22px;transition:transform .15s}
+.tab:hover{color:var(--fg);background:color-mix(in srgb,var(--panel) 60%,transparent)}
+.tab:hover img{transform:translateY(-2px)}
+.tab[aria-selected="true"]{color:var(--fg);background:var(--panel);border-color:var(--line);padding-top:10px}
+.tab:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.topline{height:1px;background:var(--line)}
+@media (max-width:640px){
+  /* Handy: alle Tabs passen nebeneinander, Icon über dem Namen */
+  .topin{flex-direction:column;align-items:stretch;gap:0;padding-top:6px}
+  .brand{padding-bottom:4px;font-size:18px}
+  .tabs{gap:2px}
+  .tab{flex:1 1 0;min-width:0;flex-direction:column;gap:2px;padding:6px 0;font-size:12px;letter-spacing:-.02em;line-height:1;text-align:center}
+  .tab img{width:20px;height:20px}
+  .tab[aria-selected="true"]{padding-top:6px}
+  main{padding-block:18px 56px}
+  section.pane{gap:16px}
+  .card{padding:14px}
+  .lead{font-size:14.5px}
+  .hero canvas{height:200px}
+  .facts3{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat b{font-size:26px}
+  .tiles{gap:10px}
+  .tile{padding:12px 14px}
+  .dim .xyz{gap:8px;padding:12px}
+  .viewer{height:min(70vh,calc(100vw + 40px))}
+  .iso canvas{height:340px}
+  .items{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+/* Touch-Geräte: Felder ab 16 px, sonst zoomt iOS beim Antippen hinein; größere Tippflächen */
+@media (pointer:coarse){
+  .mcin,textarea.mcin,.numrow .mcin,select,.ench select,#prior{font-size:16px!important}
+  .mcbtn.sm{padding:6px 12px}
+  .seg button{padding:9px 6px}
+  input[type=range]{height:28px}
+}
 
+main{padding-block:28px 72px}
+section.pane{display:flex;flex-direction:column;gap:20px;animation:rise .25s ease}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Bausteine ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card > h3{margin-bottom:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field > span{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* Minecraft-Textfeld: schwarz mit grauem Rand */
+.mcin{font:600 16px var(--f-mono);font-variant-numeric:tabular-nums;color:#f0f0f0;background:#0b0b0b;
+  border:2px solid #a0a0a0;border-radius:0;padding:8px 10px;width:100%;min-width:0;outline:none}
+.mcin:focus{border-color:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent)}
+.mcin::placeholder{color:#6d6d6d}
+textarea.mcin{font-size:13px;resize:vertical;min-height:44px}
+/* Minecraft-Knopf: Stein mit Kante */
+.mcbtn{all:unset;cursor:pointer;font-family:var(--f-display);font-size-adjust:.52;font-size:16px;color:#f2f2f2;text-shadow:2px 2px 0 #3f3f3f;
+  background:linear-gradient(#8c8c8c,#6f6f6f);border:2px solid #1e1e1e;
+  box-shadow:inset 2px 2px 0 #b5b5b5,inset -2px -2px 0 #4f4f4f;padding:6px 14px;text-align:center;white-space:nowrap}
+.mcbtn:hover{background:linear-gradient(#8f96c8,#6f78b0);box-shadow:inset 2px 2px 0 #b9c0ee,inset -2px -2px 0 #4b5290}
+.mcbtn:active{transform:translateY(1px)}
+.mcbtn:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.mcbtn.sm{font-size:14px;padding:3px 10px}
+.mcbtn[disabled]{opacity:.45;pointer-events:none}
+/* Umschalter-Gruppe */
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:4px}
+.seg button{all:unset;cursor:pointer;flex:1;text-align:center;padding:6px 6px;border-radius:5px;font-weight:600;font-size:14px;color:var(--muted);white-space:nowrap;
+  display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button img{width:16px;height:16px}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button:focus-visible{outline:2px solid var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+/* Minecraft-Tooltip (lila Rahmen) */
+.tip{background:#100010f0;color:#fff;border:2px solid #25015b;outline:2px solid #100010;border-radius:2px;
+  padding:6px 9px;font-family:var(--f-display);font-size-adjust:.52;font-size:15px;line-height:1.35;box-shadow:inset 0 0 0 1px #5000ff50}
+.tip .t-name{color:#55ffff}
+.tip .t-ench{color:#a8a8a8}
+.tip .t-cost{color:#80ff20}
+
+/* ---------- Home ---------- */
+.hero{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#79a7ff}
+.hero canvas{display:block;width:100%;height:clamp(220px,38vw,360px)}
+.hero .ttl{position:absolute;left:0;right:0;top:0;padding:clamp(18px,4vw,36px);pointer-events:none}
+.hero h1{font-family:var(--f-display);font-size-adjust:.52;font-weight:700;font-size:clamp(40px,9vw,80px);line-height:.95;margin:0;color:#fff;
+  text-shadow:4px 4px 0 rgba(0,0,0,.35);letter-spacing:.02em;position:relative;display:inline-block}
+.hero h1 span{color:#9ff7fb}
+.splash{position:absolute;right:-.6em;bottom:-.7em;transform:rotate(-14deg);transform-origin:center;white-space:nowrap;
+  font-family:var(--f-display);font-size-adjust:.52;font-size:clamp(14px,2.4vw,22px);color:#ffff3f;text-shadow:2px 2px 0 #3f3f00;
+  animation:splash .5s ease-in-out infinite alternate}
+@keyframes splash{to{transform:rotate(-14deg) scale(1.08)}}
+.clock{position:absolute;right:12px;bottom:10px;font-family:var(--f-display);font-size-adjust:.52;font-size:14px;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:14px}
+.tile{all:unset;cursor:pointer;display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px;box-shadow:var(--shadow);transition:transform .18s ease,border-color .18s ease}
+.tile:hover{transform:translateY(-3px);border-color:var(--accent)}
+.tile:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.tile img{width:40px;height:40px;flex:none}
+.tile b{display:block;font-family:var(--f-display);font-size-adjust:.52;font-size:19px;font-weight:700}
+.tile small{display:block;color:var(--muted);font-size:13.5px;line-height:1.4;margin-top:2px}
+.facts3{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-family:var(--f-display);font-size-adjust:.52;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+
+/* ---------- Gebäude ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:20px}
 .build{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:10px;
   overflow:hidden;color:inherit;text-decoration:none;box-shadow:var(--shadow);
@@ -50,26 +171,223 @@ h2{font-family:var(--f-display);font-weight:500;font-size:24px;margin:44px 0 16p
 .build img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
 .build:hover img{transform:scale(1.04)}
 .build .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
-.build h3{font-family:var(--f-display);font-weight:700;font-size:22px;margin:0}
+.build h3{font-weight:700;font-size:22px}
 .build p{margin:0;color:var(--muted);font-size:14px}
 .facts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
 .facts span{color:var(--muted)}
 .go{margin-top:8px;font-weight:600;color:var(--accent)}
-
 .soon{border:2px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;
-  min-height:220px;color:var(--muted);font-family:var(--f-display);font-size:18px;text-align:center;padding:24px}
-@media (prefers-reduced-motion:reduce){.build,.build img{transition:none}.build:hover{transform:none}.build:hover img{transform:none}}
+  min-height:220px;color:var(--muted);font-family:var(--f-display);font-size-adjust:.52;font-size:18px;text-align:center;padding:24px}
+
+/* ---------- Nether ---------- */
+.dims{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:stretch}
+@media (max-width:760px){.dims{grid-template-columns:1fr}.swap{transform:rotate(90deg)}}
+.dim{border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--panel);box-shadow:var(--shadow)}
+.dim header{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#fff;font-family:var(--f-display);font-size-adjust:.52;font-size:20px;text-shadow:2px 2px 0 rgba(0,0,0,.35)}
+.dim header img{width:28px;height:28px}
+.dim.ow header{background:linear-gradient(90deg,#4f8a30,#6aab42)}
+.dim.ne header{background:linear-gradient(90deg,#6e1d18,#a8382b)}
+.dim .xyz{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px}
+.dim .foot{padding:0 16px 14px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.swap{align-self:center;justify-self:center;font-family:var(--f-display);font-size-adjust:.52;font-size:28px;color:var(--muted)}
+.tpline{font-family:var(--f-mono);font-size:12.5px;background:var(--sunk);border:1px solid var(--line);border-radius:5px;padding:4px 8px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;cursor:copy}
+.places{display:flex;flex-direction:column;gap:8px}
+.place{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg)}
+.place img{width:24px;height:24px}
+.place b{display:block;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.place .c{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;display:flex;flex-wrap:wrap;gap:2px 12px}
+.place .c i{font-style:normal;color:var(--fg)}
+.place .acts{display:flex;gap:6px}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:14px;border:2px dashed var(--line);border-radius:8px}
+.facts-list{margin:0;padding-left:18px;color:var(--muted);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.facts-list b{color:var(--fg)}
+
+/* ---------- Formen ---------- */
+.shape{display:grid;grid-template-columns:300px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:880px){.shape{grid-template-columns:1fr}}
+/* Regler bleiben beim Scrollen am Bildschirm (Desktop); am Handy bleibt die Ebenen-Leiste oben kleben */
+@media (min-width:881px){.shape .ctl{position:sticky;top:76px;max-height:calc(100vh - 92px);overflow-y:auto;scrollbar-width:thin}}
+.layernav{position:sticky;top:76px;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:6px 0;margin:-6px 0}
+@media (max-width:880px){.layernav{top:var(--toph,88px)}}
+.ctl{display:flex;flex-direction:column;gap:14px}
+.ctl label.rng{display:flex;justify-content:space-between;font-size:13px;font-weight:600}
+.ctl label.rng output{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.numrow{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:10px;align-items:center}
+.numrow .mcin{padding:4px 6px;font-size:14px;text-align:center}
+.mats{display:flex;gap:6px;flex-wrap:wrap}
+.mats button{all:unset;cursor:pointer;width:30px;height:30px;border:2px solid transparent;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.mats button img{width:100%;height:100%;display:block}
+.mats button[aria-pressed="true"]{border-color:var(--fg)}
+.mats button:focus-visible{outline:2px solid var(--accent)}
+.out{display:flex;flex-direction:column;gap:14px;min-width:0}
+.sumrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.sumrow .stat{padding:10px 12px}
+.sumrow .stat b{font-size:22px}
+.layernav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.layernav input[type=range]{flex:1;min-width:120px}
+.lname{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;min-width:9ch}
+.board{position:relative;height:clamp(320px,62vh,640px);border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.board canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.board.drag canvas{cursor:grabbing}
+.board .vbar{right:8px;bottom:8px}
+.info{font-family:var(--f-mono);font-size:13px;color:var(--muted);min-height:1.5em}
+.info b{color:var(--fg)}
+.iso{position:relative;border:1px solid var(--line);border-radius:8px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--accent) 12%,var(--panel)),var(--panel));overflow:hidden}
+.iso canvas{display:block;width:100%;height:clamp(300px,52vh,520px);cursor:grab;touch-action:none}
+.iso.drag canvas{cursor:grabbing}
+.iso .vbar{right:8px;bottom:8px}
+.ihint{position:absolute;left:10px;top:8px;font-size:12px;color:var(--muted);pointer-events:none}
+@media (pointer:coarse){.ihint{display:none}}
+.cols2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:640px){.cols2{grid-template-columns:1fr}}
+
+/* ---------- Verzauberungen ---------- */
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+/* Inventar-Slot */
+.slot{all:unset;cursor:pointer;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:#8b8b8b;border:2px solid;border-color:#373737 #fff #fff #373737;position:relative}
+.slot img{width:58%;height:58%}
+.slot span{font-family:var(--f-display);font-size-adjust:.52;font-size:11px;color:#1f1f1f;line-height:1}
+.slot:hover{background:#a2a2a2}
+.slot[aria-pressed="true"]{background:#c6c6c6;box-shadow:inset 0 0 0 2px var(--ench)}
+.slot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.enchs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:8px}
+.ench{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--bg);cursor:pointer;transition:border-color .15s,background .15s}
+.ench:hover{border-color:var(--line-10)}
+.ench input[type=checkbox]{accent-color:var(--ench);width:17px;height:17px;flex:none}
+.ench .nm{flex:1;min-width:0;font-size:14.5px;font-weight:600}
+.ench .nm small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.ench select{font:600 13px var(--f-mono);background:var(--panel);color:var(--fg);border:1px solid var(--line-10);border-radius:5px;padding:2px 4px}
+.ench.on{border-color:var(--ench);background:color-mix(in srgb,var(--ench) 9%,var(--bg))}
+.ench.off{opacity:.42;cursor:not-allowed}
+.ench.off .nm small::after{content:" · verträgt sich nicht"}
+.steps{display:flex;flex-direction:column;gap:10px;counter-reset:st}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) auto minmax(0,1fr) auto;gap:10px;align-items:center;
+  background:#c6c6c6;border:2px solid;border-color:#fff #555 #555 #fff;padding:10px;color:#1f1f1f}
+.step::before{counter-increment:st;content:counter(st);font-family:var(--f-display);font-size-adjust:.52;font-size:20px;text-align:center;color:#3f3f3f}
+.step .tip{font-size:14px;min-width:0}
+.step .plus{font-family:var(--f-display);font-size-adjust:.52;font-size:22px;color:#3f3f3f}
+.step .cost{font-family:var(--f-display);font-size-adjust:.52;font-size:16px;color:#3f8d0f;text-align:right;white-space:nowrap}
+.step .cost b{font-family:"Press Start 2P",var(--f-display);font-size:15px;color:#2d7a00;margin-left:4px}
+.step .cost.warn b{color:#c03030}
+@media (max-width:700px){
+  .step{grid-template-columns:24px minmax(0,1fr);row-gap:6px}
+  .step .plus{grid-column:2;text-align:left;font-size:16px;line-height:1}
+  .step .tip{grid-column:2}
+  .step .cost{grid-column:2;text-align:left}
+}
+.total{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:baseline;font-family:var(--f-display);font-size-adjust:.52}
+/* Zahl wie die Level-Anzeige im Spiel: grün mit schwarzem Rand */
+.total b{font-family:"Press Start 2P",var(--f-display);font-weight:400;font-size:24px;line-height:1;color:#80ff20;margin:0 6px;letter-spacing:2px;
+  text-shadow:-2px 0 0 #000,2px 0 0 #000,0 -2px 0 #000,0 2px 0 #000,2px 2px 0 #000,3px 3px 0 #000}
+.xpbar{height:10px;background:#1c1c1c;border:2px solid #000;position:relative;overflow:hidden}
+.xpbar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(#b2ff5e,#5fbf1f 60%,#3f8d0f);transition:width .4s ease}
+.warnbox{border:2px solid var(--nether);background:color-mix(in srgb,var(--nether) 10%,var(--panel));border-radius:8px;padding:10px 14px;font-size:14px}
+.enchwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+@media (max-width:900px){.enchwrap{grid-template-columns:1fr}}
+
+/* ---------- Handel: Bildbetrachter ---------- */
+.viewer{position:relative;height:min(78vh,820px);background:#323232;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;box-shadow:var(--shadow)}
+.viewer.drag{cursor:grabbing}
+.viewer:fullscreen{height:100vh;border-radius:0;border:0}
+.vstage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.vstage img{display:block;max-width:none;image-rendering:auto}
+.viewer.crisp .vstage img{image-rendering:pixelated}
+.vbar{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;align-items:center;background:rgba(20,20,20,.75);padding:6px;border:2px solid #000}
+.vzoom{font-family:var(--f-display);font-size-adjust:.52;color:#fff;min-width:5ch;text-align:center;font-variant-numeric:tabular-nums}
+.jobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+.job{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:8px 12px 8px 8px;border-radius:10px;
+  background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;animation:rise .35s ease backwards;animation-delay:var(--d)}
+.job:hover{transform:translateY(-2px);border-color:var(--line-10)}
+.job:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.job .av{width:44px;height:44px;flex:none;border-radius:6px;background-image:url(img/handel@2x.webp);background-color:#323232;
+  image-rendering:pixelated;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35);transition:transform .25s ease}
+.job .jt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.job b{font-family:var(--f-display);font-size-adjust:.52;font-size:17px;font-weight:500}
+.job small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.job .jgo{font-family:var(--f-display);font-size-adjust:.52;font-size:22px;color:var(--muted);transition:transform .2s ease,color .2s ease}
+.job.on{border-color:#17b14b;background:color-mix(in srgb,#17b14b 12%,var(--bg));box-shadow:0 0 0 3px color-mix(in srgb,#17b14b 22%,transparent)}
+.job.on .av{animation:bob .9s ease-in-out infinite alternate}
+.job.on .jgo{color:#17b14b;transform:rotate(90deg)}
+@keyframes bob{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-3px) rotate(3deg)}}
+/* Markierung im Bild: Spotlight + leuchtender Rahmen mit Ecken */
+.vmark{position:absolute;pointer-events:none;border-radius:6px;box-shadow:0 0 0 9999px rgba(0,0,0,.55);opacity:0}
+.vmark::before{content:"";position:absolute;inset:-4px;border:3px solid #3fe07a;border-radius:8px;
+  box-shadow:0 0 18px 2px rgba(63,224,122,.6),inset 0 0 18px rgba(63,224,122,.35)}
+.vmark.show{animation:markIn .55s cubic-bezier(.2,.9,.3,1.3) .35s forwards}
+.vmark.show::before{animation:glow 1.4s ease-in-out .9s infinite alternate}
+.vmark i{position:absolute;width:18px;height:18px;border:4px solid #ffe14a}
+.vmark .c1{left:-10px;top:-10px;border-right:0;border-bottom:0}
+.vmark .c2{right:-10px;top:-10px;border-left:0;border-bottom:0}
+.vmark .c3{left:-10px;bottom:-10px;border-right:0;border-top:0}
+.vmark .c4{right:-10px;bottom:-10px;border-left:0;border-top:0}
+.vtag{position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;
+  background:#100010f0;color:#55ffff;border:2px solid #25015b;outline:2px solid #100010;padding:3px 10px;font-family:var(--f-display);font-size-adjust:.52;font-size:16px}
+@keyframes markIn{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:scale(1)}}
+@keyframes glow{from{box-shadow:0 0 10px 1px rgba(63,224,122,.45),inset 0 0 10px rgba(63,224,122,.2)}to{box-shadow:0 0 26px 5px rgba(63,224,122,.8),inset 0 0 22px rgba(63,224,122,.45)}}
+
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);opacity:0;
+  transition:.25s ease;pointer-events:none;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .build:hover,.tile:hover{transform:none}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="strip" aria-hidden="true"></div>
-  <header>
-    <h1>LizzoLevi <span>MC</span></h1>
-    <p class="lead">Unsere Minecraft-Bauwerke mit 3D-Ansicht, Bauplan für jede Ebene und Materialliste. Such dir ein Gebäude aus.</p>
-  </header>
 
-  <h2>Gebäude</h2>
+<div class="top">
+  <div class="wrap topin">
+    <a class="brand" href="#home"><img class="px" data-sprite="grass" alt="">LizzoLevi <span>MC</span></a>
+    <nav class="tabs" role="tablist" aria-label="Bereiche">
+      <button class="tab" role="tab" data-tab="home"><img class="px" data-sprite="grass" alt="">Home</button>
+      <button class="tab" role="tab" data-tab="gebaeude"><img class="px" data-sprite="bricks" alt="">Gebäude</button>
+      <button class="tab" role="tab" data-tab="nether"><img class="px" data-sprite="portal" alt="">Nether</button>
+      <button class="tab" role="tab" data-tab="formen"><img class="px" data-sprite="ring" alt="">Formen</button>
+      <button class="tab" role="tab" data-tab="verzaubern"><img class="px" data-sprite="book" alt="">Verzaubern</button>
+      <button class="tab" role="tab" data-tab="handel"><img class="px" data-sprite="emerald" alt="">Handel</button>
+    </nav>
+  </div>
+  <div class="topline"></div>
+</div>
+
+<main class="wrap">
+
+<!-- ================= HOME ================= -->
+<section class="pane" id="home" role="tabpanel" hidden>
+  <div class="hero">
+    <canvas id="heroCanvas" class="px" aria-label="Pixel-Landschaft, Tageszeit passt sich der echten Uhrzeit an"></canvas>
+    <div class="ttl"><h1>LizzoLevi <span>MC</span><span class="splash" id="splash"></span></h1></div>
+    <div class="clock" id="clock"></div>
+  </div>
+  <p class="lead" style="margin:0">Unser Minecraft-Hauptquartier: Baupläne für unsere Gebäude und Rechner für alles, was man beim Bauen ständig nachschlagen muss.</p>
+  <div class="tiles">
+    <button class="tile" data-go="gebaeude"><img class="px" data-sprite="bricks" alt=""><span><b>Gebäude</b><small>Kuppel, Enderfarm und mehr mit 3D-Ansicht und Bauplan pro Ebene</small></span></button>
+    <button class="tile" data-go="nether"><img class="px" data-sprite="portal" alt=""><span><b>Nether-Rechner</b><small>Koordinaten umrechnen, Portale verknüpfen, Orte speichern</small></span></button>
+    <button class="tile" data-go="formen"><img class="px" data-sprite="ring" alt=""><span><b>Formen</b><small>Kreise, Ellipsen, Kugeln und Kuppeln Block für Block</small></span></button>
+    <button class="tile" data-go="handel"><img class="px" data-sprite="emerald" alt=""><span><b>Handel</b><small>Alle Dorfbewohner-Angebote auf einer Übersicht zum Reinzoomen</small></span></button>
+    <button class="tile" data-go="verzaubern"><img class="px" data-sprite="book" alt=""><span><b>Verzaubern</b><small>Beste Amboss-Reihenfolge, damit nichts „Zu teuer!“ wird</small></span></button>
+  </div>
+  <div class="facts3">
+    <div class="stat"><b>2</b><span>Gebäude mit Bauplan</span></div>
+    <div class="stat"><b>5902</b><span>Blöcke verplant</span></div>
+    <div class="stat"><b id="placeCount">0</b><span>gespeicherte Orte</span></div>
+    <div class="stat"><b>26.2</b><span>Minecraft-Version</span></div>
+  </div>
+</section>
+
+<!-- ================= GEBÄUDE ================= -->
+<section class="pane" id="gebaeude" role="tabpanel" hidden>
+  <header>
+    <h2>Gebäude</h2>
+    <p class="lead">Unsere Bauwerke mit 3D-Ansicht, Bauplan für jede Ebene und Materialliste.</p>
+  </header>
   <div class="grid">
     <a class="build" href="../kuppel/">
       <div class="pic"><img src="img/kuppel.webp" alt="Ellipsen-Kuppel mit Glasdach in der Abendsonne" width="1200" height="675"></div>
@@ -99,6 +417,178 @@ h2{font-family:var(--f-display);font-weight:500;font-size:24px;margin:44px 0 16p
     </a>
     <div class="soon">Nächstes Gebäude<br>kommt bald</div>
   </div>
-</div>
+</section>
+
+<!-- ================= NETHER ================= -->
+<section class="pane" id="nether" role="tabpanel" hidden>
+  <header>
+    <h2>Nether-Rechner</h2>
+    <p class="lead">Ein Block im Nether sind acht in der Oberwelt. Tipp auf einer Seite Koordinaten ein, die andere rechnet sich mit.</p>
+  </header>
+
+  <div class="dims">
+    <div class="dim ow">
+      <header><img class="px" data-sprite="grass" alt="">Oberwelt</header>
+      <div class="xyz">
+        <label class="field"><span>X</span><input class="mcin" id="owX" inputmode="decimal" placeholder="0"></label>
+        <label class="field"><span>Y</span><input class="mcin" id="owY" inputmode="decimal" placeholder="64"></label>
+        <label class="field"><span>Z</span><input class="mcin" id="owZ" inputmode="decimal" placeholder="0"></label>
+      </div>
+      <div class="foot"><span class="tpline" id="owTp" title="Zum Kopieren tippen"></span></div>
+    </div>
+    <div class="swap" aria-hidden="true">⇄</div>
+    <div class="dim ne">
+      <header><img class="px" data-sprite="netherrack" alt="">Nether</header>
+      <div class="xyz">
+        <label class="field"><span>X</span><input class="mcin" id="neX" inputmode="decimal" placeholder="0"></label>
+        <label class="field"><span>Y</span><input class="mcin" id="neY" inputmode="decimal" placeholder="64"></label>
+        <label class="field"><span>Z</span><input class="mcin" id="neZ" inputmode="decimal" placeholder="0"></label>
+      </div>
+      <div class="foot"><span class="tpline" id="neTp" title="Zum Kopieren tippen"></span></div>
+    </div>
+  </div>
+
+  <div class="cols2">
+    <div class="card">
+      <h3>F3 + C einfügen</h3>
+      <p class="muted" style="margin:0 0 10px;font-size:14px">Drück im Spiel <b>F3 + C</b> und füg den kopierten Text hier ein. Die Dimension wird automatisch erkannt.</p>
+      <textarea class="mcin" id="paste" rows="2" placeholder="/execute in minecraft:overworld run tp @s 123.45 64.00 -789.12 …"></textarea>
+      <div class="info" id="pasteInfo" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h3>Ort speichern</h3>
+      <div class="row" style="flex-wrap:nowrap">
+        <input class="mcin" id="placeName" placeholder="z. B. Basis, Festung, Bastion …" maxlength="40">
+        <button class="mcbtn" id="placeAdd">Speichern</button>
+      </div>
+      <p class="muted" style="margin:10px 0 0;font-size:13px">Speichert die Koordinaten von oben. Bleibt nur in diesem Browser gespeichert.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Gespeicherte Orte</h3>
+    <div class="places" id="places"></div>
+  </div>
+
+  <div class="card">
+    <h3>Gut zu wissen</h3>
+    <ul class="facts-list">
+      <li><b>X und Z</b> werden durch 8 geteilt, <b>Y bleibt gleich</b>.</li>
+      <li>Ein Portal sucht in der <b>Oberwelt im Umkreis von 128 Blöcken</b> nach einem Gegenstück, im <b>Nether nur 16 Blöcke</b>. Bau das Nether-Portal deshalb genau an die berechnete Stelle.</li>
+      <li>Zwei Oberwelt-Portale sollten mindestens <b>1024 Blöcke</b> auseinander liegen, sonst landen beide im selben Nether-Portal.</li>
+      <li>Über der Bedrock-Decke (Y 128) kann man bauen, aber Portale dort verknüpfen sich trotzdem nach Y.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= FORMEN ================= -->
+<section class="pane" id="formen" role="tabpanel" hidden>
+  <header>
+    <h2>Formen-Rechner</h2>
+    <p class="lead">Kreise, Ellipsen, Kugeln und Kuppeln als Blockraster. Tippe auf Blöcke, um sie als gesetzt abzuhaken.</p>
+  </header>
+  <div class="shape">
+    <div class="card ctl">
+      <div class="seg" id="shapeSeg">
+        <button data-shape="kreis" aria-pressed="true">Kreis</button>
+        <button data-shape="ellipse" aria-pressed="false">Ellipse</button>
+        <button data-shape="kugel" aria-pressed="false">Kugel</button>
+        <button data-shape="kuppel" aria-pressed="false">Kuppel</button>
+      </div>
+      <div class="field" data-for="w"><label class="rng" for="sW"><span id="sWlab">Durchmesser</span></label>
+        <div class="numrow"><input type="range" id="sW" min="3" max="128" value="21"><input class="mcin" id="sWn" inputmode="numeric" value="21"></div></div>
+      <div class="field" data-for="d"><label class="rng" for="sD"><span>Länge (Z)</span></label>
+        <div class="numrow"><input type="range" id="sD" min="3" max="128" value="13"><input class="mcin" id="sDn" inputmode="numeric" value="13"></div></div>
+      <div class="field" data-for="h"><label class="rng" for="sH"><span>Höhe</span></label>
+        <div class="numrow"><input type="range" id="sH" min="2" max="64" value="10"><input class="mcin" id="sHn" inputmode="numeric" value="10"></div></div>
+      <div class="field"><span>Füllung</span>
+        <div class="seg" id="fillSeg">
+          <button data-fill="hohl" aria-pressed="true">Hohl</button>
+          <button data-fill="voll" aria-pressed="false">Voll</button>
+        </div></div>
+      <div class="field" id="thickF"><label class="rng" for="sT">Wandstärke <output id="sTo">1</output></label>
+        <input type="range" id="sT" min="1" max="8" value="1"></div>
+      <div class="field"><span>Block</span><div class="mats" id="mats"></div></div>
+      <button class="mcbtn sm" id="resetDone">Abhaken zurücksetzen</button>
+    </div>
+
+    <div class="out">
+      <div class="sumrow">
+        <div class="stat"><b id="sumL">–</b><span>diese Ebene</span></div>
+        <div class="stat"><b id="sumT">–</b><span>Blöcke gesamt</span></div>
+        <div class="stat"><b id="sumS">–</b><span>Stacks</span></div>
+        <div class="stat"><b id="sumDone">–</b><span>abgehakt</span></div>
+      </div>
+      <div class="layernav" id="layerNav">
+        <button class="mcbtn sm" id="lPrev" aria-label="Ebene runter">▼</button>
+        <input type="range" id="lRange" min="0" max="0" value="0" aria-label="Ebene">
+        <button class="mcbtn sm" id="lNext" aria-label="Ebene hoch">▲</button>
+        <span class="lname" id="lName"></span>
+      </div>
+      <div class="board" id="board"><canvas id="grid" aria-label="Blockraster: ziehen zum Verschieben, Mausrad oder zwei Finger zum Zoomen, antippen zum Abhaken"></canvas>
+        <div class="vbar"><button class="mcbtn sm" id="bOut" aria-label="Herauszoomen">−</button><span class="vzoom" id="bZoom">100%</span><button class="mcbtn sm" id="bIn" aria-label="Hineinzoomen">+</button><button class="mcbtn sm" id="bFit">Ganz</button></div></div>
+      <div class="info" id="cellInfo">Ziehen zum Verschieben, Mausrad oder zwei Finger zum Zoomen. Die Zahl sagt, wie viele Blöcke am Stück gesetzt werden. Antippen hakt ab.</div>
+      <div class="iso" id="isoWrap"><canvas id="iso" aria-label="3D-Vorschau: rechte Maustaste gedrückt halten zum Drehen, linke zum Verschieben, Mausrad zum Zoomen"></canvas>
+        <div class="ihint">Rechtsklick halten: drehen · Linksklick: verschieben · Rad: zoomen</div>
+        <div class="vbar"><button class="mcbtn sm" id="iL" aria-label="Nach links drehen">⟲</button><button class="mcbtn sm" id="iR" aria-label="Nach rechts drehen">⟳</button><button class="mcbtn sm" id="iOut" aria-label="Herauszoomen">−</button><span class="vzoom" id="iZoom">100%</span><button class="mcbtn sm" id="iIn" aria-label="Hineinzoomen">+</button><button class="mcbtn sm" id="iFit">Ganz</button></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VERZAUBERN ================= -->
+<section class="pane" id="verzaubern" role="tabpanel" hidden>
+  <header>
+    <h2>Verzauberungs-Reihenfolge</h2>
+    <p class="lead">Wähl Werkzeug und Bücher. Der Rechner probiert alle Kombinationen am Amboss durch und zeigt dir die günstigste Reihenfolge, ohne dass es „Zu teuer!“ wird.</p>
+  </header>
+  <div class="enchwrap">
+    <div class="card">
+      <h3>1. Gegenstand</h3>
+      <div class="items" id="items"></div>
+      <h3 style="margin-top:18px">2. Bücher</h3>
+      <div class="enchs" id="enchs"></div>
+      <div class="row" style="margin-top:14px;justify-content:space-between">
+        <label class="field" style="flex-direction:row;align-items:center;gap:8px;font-size:14px">Schon
+          <select id="prior" style="font:600 13px var(--f-mono);background:var(--panel);color:var(--fg);border:1px solid var(--line-10);border-radius:5px;padding:3px 6px">
+            <option value="0">0×</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option>
+          </select> im Amboss gewesen</label>
+        <div class="row"><button class="mcbtn sm" id="allMax">Alles max.</button><button class="mcbtn sm" id="noneE">Leeren</button></div>
+      </div>
+    </div>
+    <div class="card" id="result">
+      <h3>3. Reihenfolge</h3>
+      <div id="resBody"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HANDEL ================= -->
+<section class="pane" id="handel" role="tabpanel" hidden>
+  <header>
+    <h2>Dorfbewohner-Handel</h2>
+    <p class="lead">Alle Berufe mit ihren Angeboten von Stufe 1 bis 5. Zum Zoomen zwei Finger, Mausrad oder Doppeltippen; zum Verschieben ziehen.</p>
+  </header>
+  <div class="viewer" id="viewer">
+    <div class="vstage" id="vstage"><img id="vimg" src="img/handel@2x.webp" alt="Übersicht aller Dorfbewohner-Handelsangebote in Minecraft nach Beruf" width="3556" height="3604" draggable="false"></div>
+    <div class="vmark" id="vmark" hidden><span class="vtag" id="vmarkName"></span><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></div>
+    <div class="vbar">
+      <button class="mcbtn sm" id="vOut" aria-label="Herauszoomen">−</button>
+      <span class="vzoom" id="vZoom">100%</span>
+      <button class="mcbtn sm" id="vIn" aria-label="Hineinzoomen">+</button>
+      <button class="mcbtn sm" id="vFit">Ganz</button>
+      <button class="mcbtn sm" id="vFull" aria-label="Vollbild">⛶</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Berufe <small class="muted" style="font-family:var(--f-body);font-size:13px;font-weight:400">· antippen, um sie oben im Bild zu finden</small></h3>
+    <div class="jobs" id="jobs"></div>
+    <p class="muted" style="font-size:13px;margin:12px 0 0">Pro Stufe gibt es zwei Angebote, außer es ist nur eins aufgelistet. Verzauberte Bücher: jede Verzauberung gleich wahrscheinlich, Schatz-Verzauberungen (z. B. Reparatur) kosten doppelt.</p>
+  </div>
+</section>
+
+</main>
+
+<div class="toast tip" id="toast"></div>
+<script src="mc.js"></script>
 </body>
 </html>

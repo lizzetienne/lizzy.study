@@ -1,14 +1,14 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Enderman-XP-Farm 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
 <style>
 /* Layout wie bei der Kuppel: Kopf + Kennzahlen, 3D-Ansicht neben Einstellungen, Bauschritte, Materialliste, dann Ebenenplan + Ebenenliste */
 :root{
   --bg:#efedf3; --panel:#f9f8fb; --line:#dcd7e4; --line-5:#bdb4cb; --line-10:#8a7f9b;
   --fg:#1e1828; --muted:#5f5670;
   --cur:#e0b21c; --ghost:#e3dfea; --scene:#d9d2e6; --accent:#8a3fc0;
-  --f-display:"Pixelify Sans", "Courier New", monospace;
+  --f-display:"Jersey 10","Courier New",monospace;
   --f-body:"IBM Plex Sans", system-ui, sans-serif;
   --f-mono:"IBM Plex Mono", ui-monospace, monospace;
 }
@@ -19,13 +19,14 @@
   --bg:#110d17; --panel:#191322; --line:#2a2236; --line-5:#3d3250; --line-10:#5d4f74;
   --fg:#ece6f4; --muted:#a296b4; --cur:#f1c40f; --ghost:#241c30; --scene:#120a1c; --accent:#c07cf0; color-scheme:dark}
 *{box-sizing:border-box}
+html{font-synthesis-weight:none}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding-block:24px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
-h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;letter-spacing:.02em;text-wrap:balance}
-h2{font-family:var(--f-display);font-weight:500;font-size:22px;margin:0}
+h1{font-family:var(--f-display);font-size-adjust:.52;font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;letter-spacing:.02em;text-wrap:balance}
+h2{font-family:var(--f-display);font-size-adjust:.52;font-weight:500;font-size:22px;margin:0}
 .lead{margin:4px 0 0;color:var(--muted);max-width:65ch}
 .lead a{color:var(--accent)}
-.home{display:inline-block;margin-bottom:10px;font-family:var(--f-display);font-size:16px;color:var(--accent);text-decoration:none}
+.home{display:inline-block;margin-bottom:10px;font-family:var(--f-display);font-size-adjust:.52;font-size:16px;color:var(--accent);text-decoration:none}
 .home:hover{text-decoration:underline}
 .stats{display:flex;flex-wrap:wrap;gap:8px 24px;font-family:var(--f-mono);font-size:14px}
 .stats b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -80,7 +81,7 @@ tr:hover td{background:color-mix(in srgb,var(--cur) 12%,transparent)}
 
 <div class="wrap">
   <header>
-    <a class="home" href="../mc/">← LizzoLevi MC</a>
+    <a class="home" href="../mc/#gebaeude">← LizzoLevi MC</a>
     <h1>Enderman-XP-Farm 3D</h1>
     <p class="lead">Nachgebaut nach dem <a href="https://youtu.be/1IM9zCwQUek" target="_blank" rel="noopener">Tutorial von ReytGood</a>: eine Steinplattform im Void des Ends, eine Endermite als Köder in der Mitte, ein Fallschacht aus Laub und unten die Schlagkammer mit Trichtern und Kisten. Dreh die Ansicht und geh Ebene für Ebene durch.</p>
   </header>
